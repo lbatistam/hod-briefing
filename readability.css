@@ -1,0 +1,28 @@
+/* V6.0.1: comfortable desktop typography, without changing the approved design. */
+body { width: 480px; min-height: 600px; max-height: 600px; font-size: 14px; }
+.shell { min-height: 600px; }
+.brand-copy h1 { font-size: 21px; }
+.brand-copy p, .version-badge { font-size: 12px; }
+nav button { font-family: inherit; font-size: 14px; font-weight: 650; min-height: 42px; }
+nav button span { font-size: 16px; }
+.eyebrow, .section-label { font-size: 11px; letter-spacing: .1em; }
+.hero h2, .page-heading h2 { font-size: 32px; line-height: 1.1; }
+.hero p, .page-heading p { max-width: none; font-size: 14px; line-height: 1.5; }
+.primary, .secondary { font-family: inherit; font-size: 14px; font-weight: 650; min-height: 46px; }
+.status-strip b, .toggle b, .field b, .text-field b, .card-title b { font-size: 14px; }
+.status-strip small { max-width: 350px; white-space: normal; overflow-wrap: anywhere; font-size: 12px; line-height: 1.45; }
+.toggle small, .field small, .text-field small, .card-title small { font-size: 12px; line-height: 1.45; color: #637184; }
+.toggle, .field, .text-field { min-height: 76px; gap: 12px; }
+.field { flex-wrap: wrap; }
+select, .text-field input { font-family: inherit; font-size: 14px; font-weight: 500; height: 44px; }
+select { width: 195px; max-width: 100%; }
+.text-field input { width: 100%; }
+.notice p { font-size: 12px; }
+.notice b { font-size: 13px; }
+.notice > span { flex-shrink: 0; }
+.provider-head b { font-size: 16px; }
+.provider-head small { font-size: 12px; }
+.provider-head em { font-family: inherit; font-size: 11px; font-weight: 650; }
+.inline-actions .primary, .inline-actions .secondary { min-height: 46px; }
+footer, footer button { font-family: inherit; font-size: 12px; }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }

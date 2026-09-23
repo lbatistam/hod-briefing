@@ -1,0 +1,41 @@
+{
+  "manifest_version": 3,
+  "name": "HOD Briefing (V2)",
+  "version": "2.0.1",
+  "version_name": "V2.0.1",
+  "description": "Transforma conversas e dados do GoHighLevel em handoffs completos para os mentores do HOD.",
+  "icons": {
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
+  "web_accessible_resources": [{
+    "resources": ["icons/icon-128.png"],
+    "matches": ["https://*.gohighlevel.com/*", "https://*.leadconnectorhq.com/*", "https://crm.homeofficedigital.com.br/*"]
+  }],
+  "permissions": ["storage", "activeTab", "clipboardWrite"],
+  "host_permissions": ["https://api.groq.com/*"],
+  "background": { "service_worker": "background.js" },
+  "action": {
+    "default_title": "HOD Briefing (V2)",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "32": "icons/icon-32.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.gohighlevel.com/*",
+        "https://*.leadconnectorhq.com/*",
+        "https://crm.homeofficedigital.com.br/*"
+      ],
+      "js": ["settings.js", "briefing-view.js", "v2-ui.js", "content.js"],
+      "css": ["v2-content.css"],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ]
+}

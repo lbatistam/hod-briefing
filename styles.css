@@ -1,0 +1,72 @@
+#ghl-copy-conversation-button {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 2147483647;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 42px;
+  border: 1px solid rgba(255, 255, 255, .62);
+  border-radius: 15px;
+  padding: 0 17px 0 14px;
+  background: rgba(247,247,243,.96);
+  color: rgba(18, 18, 20, .92);
+  box-shadow: 0 5px 16px rgba(31,32,29,.10);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  font: 600 13px/1 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  letter-spacing: -.01em;
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: transform .18s cubic-bezier(.2,.8,.2,1), box-shadow .18s ease, background .18s ease;
+}
+
+#ghl-copy-conversation-button::before {
+  content: "";
+  width: 17px;
+  height: 17px;
+  background: currentColor;
+  opacity: .82;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='8' y='8' width='11' height='11' rx='2'/%3E%3Cpath d='M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='8' y='8' width='11' height='11' rx='2'/%3E%3Cpath d='M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+#ghl-copy-conversation-button:hover {
+  transform: translateY(-1px);
+  background: #fff;
+  box-shadow: 0 7px 20px rgba(31,32,29,.13);
+}
+#ghl-copy-conversation-button:active { transform: scale(.975); }
+#ghl-copy-conversation-button.ghl-copy-dragging { cursor: grabbing; transform: scale(1.02); transition: none; }
+#ghl-copy-conversation-button:focus-visible { outline: 3px solid rgba(10,132,255,.32); outline-offset: 3px; }
+#ghl-copy-conversation-button:disabled { cursor: wait; opacity: .82; transform: none; }
+#ghl-copy-conversation-button:disabled::before { border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; background: none; -webkit-mask: none; mask: none; animation: ghl-spin .8s linear infinite; box-sizing: border-box; }
+#ghl-copy-conversation-button.ghl-copy-ok { color: #087b38; background: rgba(236,255,243,.84); }
+#ghl-copy-conversation-button.ghl-copy-error { color: #c5221f; background: rgba(255,241,240,.88); }
+#ghl-copy-conversation-button[data-size="compact"] { min-height: 34px; padding: 0 13px 0 11px; font-size: 12px; }
+#ghl-copy-conversation-button[data-size="large"] { min-height: 50px; padding: 0 21px 0 17px; font-size: 15px; }
+#ghl-copy-conversation-button[data-icon-only="true"] { width: 42px; padding: 0; justify-content: center; gap: 0; font-size: 0; }
+#ghl-copy-conversation-button[data-theme="dark"] { border-color: rgba(255,255,255,.18); background: rgba(30,31,35,.88); color: #fff; }
+#ghl-copy-conversation-button[data-theme="light"] { border-color: rgba(255,255,255,.75); background: rgba(250,251,253,.90); color: #17171a; }
+#ghl-copy-conversation-button[data-theme="teal"] { border-color: rgba(255,255,255,.30); background: rgba(8,145,137,.92); color: #fff; }
+#ghl-copy-conversation-button[data-theme="native"] { border-color: #d9dee5; border-radius: 7px; background: #fff; color: #25272b; box-shadow: 0 1px 2px rgba(15,23,42,.10); -webkit-backdrop-filter: none; backdrop-filter: none; }
+#ghl-copy-conversation-button[data-theme="native"]:hover { background: #f7f9fb; box-shadow: 0 2px 5px rgba(15,23,42,.12); }
+#ghl-copy-conversation-button[data-theme="custom"] { border-color: rgba(255,255,255,.32); background: var(--hod-custom-color); color: var(--hod-custom-text); box-shadow: 0 2px 7px rgba(15,23,42,.14); }
+
+@keyframes ghl-spin { to { transform: rotate(360deg); } }
+
+@media (prefers-color-scheme: dark) {
+  #ghl-copy-conversation-button {
+    border-color: rgba(255,255,255,.18);
+    background: linear-gradient(180deg, rgba(61,61,66,.80), rgba(31,31,35,.72));
+    color: rgba(255,255,255,.93);
+    box-shadow: 0 1px 0 rgba(255,255,255,.14) inset, 0 12px 34px rgba(0,0,0,.34);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  #ghl-copy-conversation-button { background: #f3f4f6; -webkit-backdrop-filter: none; backdrop-filter: none; }
+}

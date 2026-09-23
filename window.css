@@ -1,0 +1,42 @@
+.hod-modal-panel {
+  height: min(760px, calc(100vh - 44px));
+  min-width: 500px;
+  min-height: 180px;
+  max-width: calc(100vw - 8px);
+  max-height: calc(100vh - 8px);
+  resize: both;
+}
+
+.hod-modal-panel > header {
+  flex: 0 0 auto;
+  cursor: grab;
+  user-select: none;
+}
+
+.hod-modal-panel > header.hod-dragging { cursor: grabbing; }
+.hod-briefing-editor { flex: 1; min-height: 0; resize: none; }
+.hod-window-controls { display: flex; align-items: center; gap: 9px; }
+
+.hod-modal-minimize {
+  width: 43px;
+  height: 43px;
+  border: 0;
+  border-radius: 50%;
+  background: #ecece7;
+  color: #3b3b38;
+  font: 400 24px/1 inherit;
+  cursor: pointer;
+}
+
+.hod-modal-minimize:hover { background: #e2e2dc; }
+.hod-modal-panel.hod-minimized { height: 89px !important; min-height: 89px; resize: none; }
+.hod-modal-panel.hod-minimized > :not(header) { display: none !important; }
+.hod-modal-panel.hod-minimized > header { border-bottom: 0; }
+
+@media (max-width: 700px) {
+  .hod-modal-panel { min-width: 0; resize: vertical; }
+}
+
+@media (prefers-color-scheme: dark) {
+  .hod-modal-minimize { background: #30312e; color: #f4f4ef; }
+}

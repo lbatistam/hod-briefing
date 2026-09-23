@@ -1,0 +1,19 @@
+name: Bug
+description: Relate um problema reproduzível com dados fictícios
+body:
+  - type: textarea
+    attributes:
+      label: Comportamento atual
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Comportamento esperado
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Como reproduzir com dados fictícios
+    validations:
+      required: true
+
