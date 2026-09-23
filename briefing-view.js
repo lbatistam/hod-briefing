@@ -16,10 +16,10 @@
   function parse(text, name = "", chips = []) {
     const lines = String(text || "").split(/\n/).map(value => value.trim()).filter(Boolean);
     const content = lines.filter(line => !/^\*\*[^*]+\*\*$/.test(line)
-      && !/^`[^`]+`$/.test(line)
+      && !(line.replace(/`[^`]+`/g, "").trim() === "")
       && line !== name
       && !chips.includes(line)
-      && !/^(?:Lead do (?:Instagram|WhatsApp|CRM)|Score\s+\d+|Perfil do GHL)$/i.test(line));
+      && !/^(?:Lead do (?:Instagram|WhatsApp|CRM)|Score\s+\d+|Perfil do Lead)$/i.test(line));
     const summary = content.find(line => !/^(?:•|[\p{Extended_Pictographic}])/u.test(line)) || "";
     const topics = content.filter(line => /^(?:[\p{Extended_Pictographic}])/u.test(line)).map(line => {
       const match = line.match(/^([^\s]+)\s+(.+)$/u);
@@ -62,7 +62,7 @@
     if (data.profile.length) {
       const title = doc.createElement("h3");
       title.className = "hod-visual-profile-title";
-      title.textContent = "Perfil do GHL";
+      title.textContent = "Perfil do Lead";
       root.append(title);
       for (const value of data.profile) {
         const row = doc.createElement("p");

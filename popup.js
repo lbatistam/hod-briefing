@@ -4,7 +4,7 @@ const $ = id => document.getElementById(id);
 const defaults = {
   reasoning: "medium", uiTheme: "system", exportFormat: "ghl", historyEnabled: false,
   enabled: true, displayMode: "conversation", buttonSize: "normal", iconOnly: false,
-  buttonLabel: "Briefing", motionStyle: "smooth"
+  buttonLabel: "Briefing", motionStyle: "smooth", topicCount: 4, showStatus: true
 };
 let activeTab;
 let contactReady = false;
@@ -34,7 +34,7 @@ function showPage(page) {
     node.setAttribute("aria-current", active ? "page" : "false");
   });
   if (page === "history") renderHistory();
-  document.querySelector(".brand strong").textContent = page === "history" ? "Histórico de Briefings" : page === "settings" ? "Configurações essenciais" : page === "appearance" ? "Aparência e Botão" : "HOD Briefing";
+  document.querySelector("main").scrollTop = 0;
   $("connection").hidden = page !== "briefing";
 }
 
@@ -121,11 +121,13 @@ async function loadSettings() {
   document.documentElement.dataset.theme = data.uiTheme;
   setSegment("theme", data.uiTheme);
   setSegment("reasoning", data.reasoning);
+  setSegment("topic-count", String(data.topicCount));
+  setSegment("button-size", data.buttonSize);
   $("export-format").value = data.exportFormat;
   $("history-enabled").checked = data.historyEnabled;
   $("enabled").checked = data.enabled;
   $("display-mode").value = data.displayMode;
-  $("button-size").value = data.buttonSize;
+  $("show-status").checked = data.showStatus !== false;
   $("icon-only").checked = data.iconOnly;
   $("button-label").value = data.buttonLabel;
   $("reduce-motion").checked = data.motionStyle === "reduced";
@@ -134,33 +136,36 @@ async function loadSettings() {
 
 function updateButtonPreview() {
   const pill = $("button-preview-pill");
-  pill.dataset.size = $("button-size").value;
-  pill.dataset.iconOnly = String($("icon-only").checked);
-  pill.dataset.enabled = String($("enabled").checked);
+  pill.dataset.size = $("button-size").querySelector("button.active")?.dataset.value || "normal";
+  pill.dataset.showStatus = String($("show-status").checked);
   $("button-preview-label").textContent = $("button-label").value.trim() || "Briefing";
 }
 
 document.querySelectorAll(".bottom-nav button").forEach(button => button.onclick = () => showPage(button.dataset.page));
 $("open-appearance").onclick = () => showPage("appearance");
 $("back-settings").onclick = () => showPage("settings");
-for (const id of ["theme", "reasoning"]) {
+for (const id of ["theme", "reasoning", "topic-count", "button-size"]) {
   $(id).querySelectorAll("button").forEach(button => button.onclick = async () => {
     setSegment(id, button.dataset.value);
-    const key = id === "theme" ? "uiTheme" : "reasoning";
-    const values = id === "reasoning" ? { reasoning: button.dataset.value, aiPreset: button.dataset.value === "low" ? "fast" : button.dataset.value === "high" ? "thorough" : "balanced" } : { uiTheme: button.dataset.value };
+    const values = id === "reasoning"
+      ? { reasoning: button.dataset.value, aiPreset: button.dataset.value === "low" ? "fast" : button.dataset.value === "high" ? "thorough" : "balanced" }
+      : id === "theme" ? { uiTheme: button.dataset.value }
+      : id === "topic-count" ? { topicCount: Number(button.dataset.value) }
+      : { buttonSize: button.dataset.value };
     await chrome.storage.sync.set(values);
     if (id === "theme") document.documentElement.dataset.theme = button.dataset.value;
+    if (id === "button-size") updateButtonPreview();
   });
 }
-const settings = [["export-format","exportFormat"],["history-enabled","historyEnabled"],["enabled","enabled"],["display-mode","displayMode"],["button-size","buttonSize"],["icon-only","iconOnly"],["button-label","buttonLabel"]];
+const settings = [["export-format","exportFormat"],["history-enabled","historyEnabled"]];
 for (const [id,key] of settings) {
   $(id).addEventListener(id === "button-label" ? "input" : "change", async event => {
     const value = event.target.type === "checkbox" ? event.target.checked : event.target.value;
     await chrome.storage.sync.set({ [key]: value });
-    if (["enabled", "button-size", "icon-only", "button-label"].includes(id)) updateButtonPreview();
   });
 }
-$("reduce-motion").onchange = async event => chrome.storage.sync.set({ motionStyle: event.target.checked ? "reduced" : "smooth" });
+$("show-status").onchange = async event => { await chrome.storage.sync.set({ showStatus: event.target.checked }); updateButtonPreview(); };
+$("save-appearance").onclick = () => toast("Aparência salva");
 $("reset-position").onclick = async () => { await chrome.storage.sync.remove("hod-v2-briefing-button-position"); toast("Posição restaurada"); };
 $("history-search").oninput = renderHistory;
 $("capture").onclick = async () => {

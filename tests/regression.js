@@ -50,7 +50,7 @@ const content = contentFunctions();
 const viewContext = {};
 vm.createContext(viewContext);
 vm.runInContext(fs.readFileSync("briefing-view.js", "utf8"), viewContext);
-const viewData = viewContext.HOD_BRIEFING_VIEW.parse("**Nair**\n\n`Lead do WhatsApp`\n\nBusca renda extra\n\n🎯 Quer trabalhar de casa\n💬 Tem dúvida sobre custos\n\n**Perfil do GHL**\n\n• 41 anos · São Paulo");
+const viewData = viewContext.HOD_BRIEFING_VIEW.parse("**Nair**\n\n`Lead do WhatsApp` `Score 31` `Autônoma`\n\nBusca renda extra\n\n🎯 Quer trabalhar de casa\n💬 Tem dúvida sobre custos\n\n**Perfil do Lead**\n\n• 41 anos · São Paulo");
 assert.strictEqual(viewData.summary, "Busca renda extra");
 assert.strictEqual(viewData.topics.length, 2);
 assert.strictEqual(viewData.profile.length, 1);
@@ -59,9 +59,13 @@ assert.strictEqual(editedView.summary, "Busca renda extra", "Depois da edição,
 assert.strictEqual(content.validFieldValue("Origem", "Capacidade para investir"), "", "Cabeçalho do CRM não pode ser tratado como capacidade financeira");
 const whatsappProfileFixture = content.formatAiBriefing({ nome: "Nair", resumo: "Busca renda extra", topicos: [] }, "Nair", { "Capacidade para investir": "Origem", Idade: "41", Estado: "São Paulo" }, "whatsapp", "");
 assert(!/Capacidade para investir: Origem/i.test(whatsappProfileFixture));
-assert(/\*\*Perfil do GHL\*\*/.test(whatsappProfileFixture), "Perfil do GHL válido só aparece no WhatsApp");
+assert(/\*\*Perfil do Lead\*\*/.test(whatsappProfileFixture), "Perfil do Lead válido só aparece no WhatsApp");
 const instagramProfileFixture = content.formatAiBriefing({ nome: "Nair", resumo: "Busca renda extra", topicos: [] }, "Nair", { Idade: "41", Score: "31", Estado: "São Paulo", "Capacidade para investir": "R$ 500" }, "instagram", "");
-assert(!/Perfil do GHL|Score 31|41 anos|Capacidade para investir/i.test(instagramProfileFixture), "Campos do formulário não pertencem ao briefing do Instagram");
+assert(!/Perfil do Lead|Score 31|41 anos|Capacidade para investir/i.test(instagramProfileFixture), "Campos do formulário não pertencem ao briefing do Instagram");
+const whatsappTagsFixture = content.formatAiBriefing({ nome: "Nair", perfil: { ocupacao: "Freelancer", situacao: "", evidencia: "sou freelancer" }, resumo: "Busca renda extra", topicos: [] }, "Nair", { Score: "31", Situação: "Autônoma" }, "whatsapp", "RESPOSTA DO LEAD: sou freelancer");
+assert(/`Lead do WhatsApp` `Score 31` `Freelancer` `Autônoma`/.test(whatsappTagsFixture), "WhatsApp deve gerar tags de canal, Score e perfil na mesma linha");
+const richTags = content.briefingClipboardFormats("**Nair**\n\n`Lead do WhatsApp` `Score 31` `Autônoma`\n\nBusca renda extra");
+assert(/<code>Lead do WhatsApp<\/code><\/strong>&nbsp;<strong><code>Score 31<\/code>/.test(richTags.html), "Tags precisam sair lado a lado no HTML para GHL");
 const inboundBubble = { className: "relative user-message chat-bubble-inbound", parentElement: null, getAttribute() { return ""; } };
 const inboundText = { className: "chat-message", parentElement: inboundBubble, getAttribute() { return ""; }, getBoundingClientRect() { return { left: 100, width: 200 }; } };
 const fakeScroller = { getBoundingClientRect() { return { left: 0, width: 1000 }; } };
@@ -362,9 +366,9 @@ assert(/event\.clipboardData\.setData\("text\/html", html\)/.test(contentSource)
 assert(/document\.addEventListener\("copy", writeRichClipboard, true\)/.test(contentSource), "A cópia rica deve interceptar listeners do CRM");
 assert(!/\*\*|`/.test(clipboard.html));
 const verticalProfile = content.formatAiBriefing({ nome: "Ayonnara Suyane", resumo: "Busca uma nova oportunidade", topicos: [{ tipo: "trabalho", texto: "Trabalha como auxiliar de atendimento", evidencia: "auxiliar de atendimento" }] }, "Ayonnara Suyane", {}, "instagram", "RESPOSTA DO LEAD (EVIDÊNCIA LITERAL): Trabalho como auxiliar de atendimento");
-assert(/`Lead do Instagram`\n`Auxiliar de atendimento`/i.test(verticalProfile), "Chips usam uma quebra simples, sem linha vazia");
+assert(/`Lead do Instagram` `Auxiliar de atendimento`/i.test(verticalProfile), "Tags devem ficar juntas na mesma linha");
 const verticalClipboard = content.briefingClipboardFormats(verticalProfile);
-assert(/<code>Lead do Instagram<\/code><\/strong><br><strong><code>Auxiliar de atendimento<\/code>/i.test(verticalClipboard.html), "Chips devem compartilhar um parágrafo e um único BR");
+assert(/<code>Lead do Instagram<\/code><\/strong>&nbsp;<strong><code>Auxiliar de atendimento<\/code>/i.test(verticalClipboard.html), "Tags devem compartilhar um parágrafo e ficar lado a lado");
 const compactEmojiClipboard = content.briefingClipboardFormats("💼 Freelancer, busca algo mais fixo\n🧠 Começou a acompanhar o mercado a partir de um anúncio");
 assert(/Freelancer, busca algo mais fixo<br>🧠 Começou/i.test(compactEmojiClipboard.html), "Emojis consecutivos precisam virar linhas reais no HTML do GHL");
 const mirianConversation = [
@@ -376,7 +380,7 @@ const mirianBriefing = content.formatAiBriefing(
   content.enrichConversationBriefing({ nome: "Mirian Santos", topicos: [] }, mirianConversation),
   "Mirian Santos", {}, "instagram", content.aiInput(mirianConversation, "instagram", {})
 );
-assert(/`Lead do Instagram`\n`Aposentada`/i.test(mirianBriefing), "Instagram deve mostrar canal e situação confirmada");
+assert(/`Lead do Instagram` `Aposentada`/i.test(mirianBriefing), "Instagram deve mostrar canal e situação confirmada");
 assert(/Trabalhou na Fiat antes de se aposentar/i.test(mirianBriefing));
 assert(/Busca aumentar a renda/i.test(mirianBriefing));
 assert(/Conheceu o Felipe recentemente/i.test(mirianBriefing));

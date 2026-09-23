@@ -1,5 +1,23 @@
 # Changelog
 
+## 2.2.0 · Contrato de briefing oficial
+
+- HOD Briefing passa a ser o nome oficial da extensão; a implementação anterior foi aposentada e a pasta atual se torna a única instalação oficial.
+- `briefing.md` foi reescrito como contrato editorial: tags classificam, resumo conta a história e tópicos adicionam fatos sem repetir a narrativa.
+- Tags do cabeçalho agora são copiadas na mesma linha, com HTML semântico compatível com o GHL.
+- WhatsApp gera `Lead do WhatsApp`, Score válido e perfil comprovado; seus campos reais aparecem no bloco **Perfil do Lead**. Instagram mantém apenas tags de origem e perfil confirmado, sem Score nem formulário.
+- O antigo nome **Perfil do GHL** foi removido da geração, visualização, testes e documentação.
+- Arquivos visuais sem uso da implementação anterior foram removidos; o preview local cobre somente o popup oficial.
+
+## 2.1.0 · Neutral Modern
+
+- Frontend integralmente refeito a partir de `HOD-Briefing-V2---Neutral-Modern.zip`: botão flutuante, painel e todos os quatro popups usam agora a mesma linguagem visual neutra, compacta e operacional.
+- Motor funcional preservado: captura do GoHighLevel, geração pela Groq, briefing editável, cópia rica, conversa, histórico e formatos de exportação continuam no mesmo fluxo.
+- Os 10 canvases foram ligados a estados reais. A quantidade de tópicos `2/3/4` deixou de ser apenas visual e passa a configurar `topicCount` no gerador.
+- Aparência agora segue o canvas dedicado: tema claro/escuro/sistema, prévia ao vivo, tamanho do botão e indicador de status configurável.
+- Arraste continua limitado a uma atualização por quadro e respeita movimento reduzido.
+- Verificação local: sintaxe dos scripts, regressão, provedor e central aprovados; os quatro popups foram inspecionados no navegador local em 380 × 600 px. A recarga da extensão e o fluxo real no Chrome/GHL ainda precisam ser confirmados após esta troca visual.
+
 ## 2.0.1 · refinamento em validação
 
 - Novo ZIP do Stitch conferido: `apple_design.md` idêntico ao guia já salvo. Hierarquia visual do painel e popup alinhada aos canvases, com resumo, tópicos rotulados, status e rodapé de cópia. Botão flutuante grafite, histórico refinado e subtela própria de aparência com prévia.

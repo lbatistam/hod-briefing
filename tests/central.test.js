@@ -23,9 +23,9 @@ const data={nome:"Ana Paula",resumo:"Busca recolocação para ficar mais perto d
 const text=c.formatAiBriefing(data,"Ana Paula",{},"instagram",evidence);
 const out=c.briefingClipboardFormats(text);
 assert(!text.includes("Tô bem"));
-assert(out.html.includes("<code>Lead do Instagram</code></strong><br><strong><code>Administração</code></strong><br><strong><code>Desempregada</code>"));
+assert(out.html.includes("<code>Lead do Instagram</code></strong>&nbsp;<strong><code>Administração</code></strong>&nbsp;<strong><code>Desempregada</code>"));
 assert(out.html.includes("</code></strong></p><p><br></p><p>"));
-assert(out.plain.includes("Lead do Instagram\nAdministração\nDesempregada"));
+assert(out.plain.includes("Lead do Instagram Administração Desempregada"));
 assert(!source.includes("const briefingData = enrichConversationBriefing(result.data"));
 assert.equal(context.HOD_CONFIG.defaults.historyEnabled,false);
 const titled=c.formatAiBriefing({...data,perfil:{ocupacao:"Social Media",situacao:"CLT",evidencia:"Sou social media CLT"}}, "Renan", {}, "instagram", "RESPOSTA DO LEAD: Sou social media CLT");
@@ -37,4 +37,4 @@ for (const sentence of ["trabalho com internet na parte de games", "presta consu
   const result=c.formatAiBriefing({...data,perfil:{ocupacao:sentence,situacao:"",evidencia:sentence}}, "Daniel", {}, "instagram", "RESPOSTA DO LEAD: " + sentence);
   assert(result.includes(sentence.charAt(0).toUpperCase()+sentence.slice(1)), "Preserva frase natural, sem Title Case");
 }
-console.log("Central V6.1: capabilities, semantic profile, single-BR export, no deterministic reinjection: OK");
+console.log("Central V6.2: capabilities, semantic profile, inline-tag export, no deterministic reinjection: OK");

@@ -5,16 +5,7 @@ from pathlib import Path
 class Preview(SimpleHTTPRequestHandler):
     def do_GET(self):
         if self.path == "/popup.html":
-            text = Path("popup.html").read_text().replace('<script src="settings.js">', '<script src="tests/mock-chrome.js"></script><script src="settings.js">')
-        elif self.path == "/result.html":
-            text = '<!doctype html><html><head><meta charset="utf-8">' + ''.join('<link rel="stylesheet" href="'+f+'">' for f in ["ai-modal.css","window.css","briefing-readability.css","central.css"]) + '</head><body><script src="tests/mock-chrome.js"></script><script src="settings.js"></script><script src="fixture.js"></script></body></html>'
-        elif self.path == "/fixture.js":
-            code = Path("content.js").read_text()
-            cutoff = code.index("  chrome.storage.sync.get(DEFAULT_SETTINGS)")
-            text = code[:cutoff] + '''
-  showBriefingModal("**Ana Paula Gama**\\n\\n`Lead do Instagram`\\n`Administração`\\n`Desempregada`\\n\\nBusca recolocação para ficar mais perto da família.\\n\\n🎯 Quer trabalhar perto da família", "CONTATO: Ana\\n\\nFELIPE:\\nO que busca?\\n\\nANA:\\nQuero ficar perto da família", {}, {label:"Demonstração local", captureMs:2800, latencyMs:1900});
-})();
-'''
+            text = Path("popup.html").read_text().replace('<script src="briefing-view.js">', '<script src="tests/mock-chrome.js"></script><script src="briefing-view.js">')
         else:
             return super().do_GET()
         self.send_response(200)

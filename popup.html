@@ -3,28 +3,109 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>HOD Briefing (V2)</title>
+  <title>HOD Briefing</title>
   <link rel="stylesheet" href="popup.css">
 </head>
 <body>
   <div class="app">
-    <header class="topbar"><div class="brand"><span class="mark" aria-hidden="true">ϟ</span><strong>HOD Briefing</strong></div><span id="connection" class="badge neutral">Verificando CRM</span></header>
+    <header class="topbar">
+      <div class="brand"><span class="mark" aria-hidden="true">H</span><strong>HOD Briefing</strong></div>
+      <span id="connection" class="connection"><i aria-hidden="true"></i>Verificando CRM</span>
+    </header>
+
     <main>
       <section id="briefing" class="page active" aria-labelledby="tab-briefing">
-        <div id="empty" class="empty"><div class="empty-icon" aria-hidden="true">▤</div><h1>Briefing do lead</h1><p>Abra uma conversa no GoHighLevel para preparar o contexto da consultoria.</p></div>
-        <div id="result" hidden><div class="identity"><div><h1 id="lead-name">Lead</h1><div id="lead-chips" class="chip-row"><span id="lead-channel" class="small-chip">Lead do CRM</span></div></div><span id="avatar" class="avatar">L</span></div><div id="briefing-preview" class="briefing-preview"></div></div>
+        <div id="empty" class="empty">
+          <div class="empty-icon" aria-hidden="true">▤</div>
+          <h1>Briefing do lead</h1>
+          <p>Abra uma conversa no GoHighLevel para preparar o contexto da consultoria.</p>
+        </div>
+
+        <div id="result" hidden>
+          <div class="identity">
+            <div>
+              <h1 id="lead-name">Lead</h1>
+              <div id="lead-chips" class="chip-row"><span id="lead-channel" class="small-chip">Lead do CRM</span></div>
+            </div>
+            <span id="avatar" class="avatar">L</span>
+          </div>
+          <div id="briefing-preview" class="briefing-preview"></div>
+        </div>
+
         <div id="operation" class="operation" role="status">Aguardando conversa</div>
-        <div class="action-stack"><button id="capture" class="secondary">Capturar conversa</button><button id="generate" class="primary">Gerar briefing</button><div id="result-actions" class="result-actions" hidden><button id="copy-briefing" class="primary">Copiar briefing</button><button id="copy-conversation" class="secondary">Copiar conversa</button><div class="quiet-actions"><button id="open-panel">Abrir painel no CRM</button><button id="clear-result">Limpar resultado</button></div></div></div>
+        <div class="action-stack">
+          <button id="capture" class="secondary">Capturar conversa</button>
+          <button id="generate" class="primary">Gerar briefing</button>
+          <div id="result-actions" class="result-actions" hidden>
+            <button id="copy-briefing" class="primary">Copiar briefing</button>
+            <button id="copy-conversation" class="secondary">Copiar conversa</button>
+            <div class="quiet-actions">
+              <button id="open-panel">Abrir painel no CRM</button>
+              <button id="clear-result">Limpar resultado</button>
+            </div>
+          </div>
+        </div>
       </section>
-      <section id="history" class="page" aria-labelledby="tab-history"><div class="section-heading"><h1>Histórico</h1><span id="history-count">0 salvos</span></div><input id="history-search" type="search" placeholder="Buscar por nome ou área" aria-label="Buscar no histórico"><div id="history-list" class="history-list"></div><p class="footnote">O histórico é opcional e fica apenas neste navegador.</p></section>
-      <section id="settings" class="page" aria-labelledby="tab-settings"><div class="section-heading"><h1>Configurações</h1></div><h2 class="eyebrow">Conexão do sistema</h2><div class="card"><div class="setting-row"><span>GoHighLevel</span><span id="crm-status" class="setting-state">Verificando</span></div><div class="setting-row"><span>Groq IA</span><span id="groq-status" class="setting-state">Verificando</span></div><label class="stacked">Chave da API (Groq)<input id="groq-key" type="password" autocomplete="off" placeholder="Nova chave"></label><div class="inline-actions"><button id="save-key" class="secondary">Salvar chave</button><button id="test-key" class="secondary">Testar conexão</button></div></div>
-        <h2 class="eyebrow">Qualidade da análise</h2><div class="card"><div id="reasoning" class="segmented compact" role="group" aria-label="Qualidade da análise"><button data-value="low">Baixo</button><button data-value="medium">Médio</button><button data-value="high">Alto</button></div><p class="hint">O modelo continua GPT-OSS 120B; a opção muda o tempo dedicado ao raciocínio.</p></div>
-        <h2 class="eyebrow">Preferências</h2><div class="card"><label class="setting-row">Formato da cópia<select id="export-format"><option value="ghl">HTML para GHL</option><option value="plain">Texto simples</option><option value="whatsapp">WhatsApp</option></select></label><label class="setting-row">Salvar histórico<input id="history-enabled" type="checkbox"></label></div>
-        <button id="open-appearance" class="appearance-link" type="button">Aparência e botão <span aria-hidden="true">›</span></button>
+
+      <section id="history" class="page" aria-labelledby="tab-history">
+        <div class="section-heading"><h1>Histórico</h1><span id="history-count">0 salvos</span></div>
+        <div class="search-wrap"><span aria-hidden="true">⌕</span><input id="history-search" type="search" placeholder="Buscar por nome ou origem…" aria-label="Buscar briefings"></div>
+        <div id="history-list" class="history-list"></div>
+        <p class="footnote">Os briefings ficam salvos somente neste navegador.</p>
       </section>
-      <section id="appearance" class="page" aria-label="Aparência e botão"><button id="back-settings" class="back-link" type="button">‹ Configurações</button><h2 class="eyebrow">Tema visual</h2><div id="theme" class="segmented compact" role="group" aria-label="Tema visual"><button data-value="system">Automático</button><button data-value="light">Claro</button><button data-value="dark">Escuro</button></div><div class="card appearance-card"><label class="setting-row">Reduzir movimento<input id="reduce-motion" type="checkbox"></label><p class="hint">Substitui animações por transições mínimas</p></div><h2 class="eyebrow">Botão flutuante (CRM)</h2><div class="card"><div class="button-preview"><span>Prévia em tempo real</span><div id="button-preview-pill">● <span id="button-preview-label">Gerar briefing</span></div></div><label class="setting-row">Botão no CRM<input id="enabled" type="checkbox"></label><label class="setting-row">Mostrar botão<select id="display-mode"><option value="conversation">Nas conversas</option><option value="contacts">Contatos e conversas</option><option value="always">Em todo o CRM</option><option value="never">Nunca</option></select></label><label class="setting-row">Tamanho<select id="button-size"><option value="compact">Pequeno</option><option value="normal">Médio</option><option value="large">Grande</option></select></label><label class="setting-row">Apenas ícone<input id="icon-only" type="checkbox"></label><label class="stacked">Texto do botão<input id="button-label" maxlength="28" placeholder="Gerar briefing"></label><button id="reset-position" class="secondary full">Restaurar posição</button></div></section>
+
+      <section id="settings" class="page" aria-labelledby="tab-settings">
+        <div class="section-heading"><h1>Configurações</h1></div>
+        <div class="field-group">
+          <label for="groq-key">Chave da Groq</label>
+          <div class="key-row"><input id="groq-key" type="password" autocomplete="off" placeholder="gsk_••••••••••••"><button id="save-key" class="secondary">Salvar</button></div>
+          <div class="provider-status"><span id="groq-status" class="setting-state">Verificando</span><span id="crm-status" class="setting-state">Verificando CRM</span></div>
+          <button id="test-key" class="secondary full">Testar conexão</button>
+        </div>
+        <div class="field-group">
+          <label>Raciocínio</label>
+          <div id="reasoning" class="segmented" role="group" aria-label="Raciocínio"><button data-value="low">Baixo</button><button data-value="medium">Médio</button><button data-value="high">Alto</button></div>
+        </div>
+        <div class="field-group">
+          <label>Quantidade de tópicos</label>
+          <div id="topic-count" class="segmented" role="group" aria-label="Quantidade de tópicos"><button data-value="2">2</button><button data-value="3">3</button><button data-value="4">4</button></div>
+        </div>
+        <label class="switch-row"><span>Salvar histórico local neste navegador</span><input id="history-enabled" type="checkbox"></label>
+        <label class="select-row"><span>Formato da cópia</span><select id="export-format"><option value="ghl">HTML para GHL</option><option value="plain">Texto simples</option><option value="whatsapp">WhatsApp</option></select></label>
+        <button id="open-appearance" class="appearance-link" type="button"><strong>Aparência</strong><span>tema, tamanho e status&nbsp; →</span></button>
+      </section>
+
+      <section id="appearance" class="page" aria-label="Aparência">
+        <div class="section-heading"><h1>Aparência</h1></div>
+        <button id="back-settings" class="back-link" type="button">← Voltar às Configurações</button>
+        <div class="field-group">
+          <label>Tema</label>
+          <div id="theme" class="segmented" role="group" aria-label="Tema"><button data-value="light">Claro</button><button data-value="dark">Escuro</button><button data-value="system">Sistema</button></div>
+        </div>
+        <div class="button-preview"><div id="button-preview-pill" class="button-preview-pill" data-size="normal"><span class="preview-grip" aria-hidden="true">⠿</span><i aria-hidden="true"></i><span id="button-preview-label">Briefing</span></div></div>
+        <div class="field-group">
+          <label>Tamanho do botão</label>
+          <div id="button-size" class="segmented" role="group" aria-label="Tamanho do botão"><button data-value="compact">Pequeno</button><button data-value="normal">Médio</button><button data-value="large">Grande</button></div>
+        </div>
+        <label class="switch-row"><span>Mostrar indicador de status</span><input id="show-status" type="checkbox"></label>
+        <button id="save-appearance" class="primary full">Salvar alterações</button>
+        <button id="reset-position" class="text-button">Restaurar posição do botão</button>
+
+        <div class="compatibility-fields" hidden>
+          <input id="enabled" type="checkbox">
+          <select id="display-mode"><option value="conversation">Conversas</option></select>
+          <input id="icon-only" type="checkbox">
+          <input id="button-label">
+          <input id="reduce-motion" type="checkbox">
+        </div>
+      </section>
     </main>
-    <nav class="bottom-nav segmented" aria-label="Áreas da extensão"><button id="tab-briefing" class="active" data-page="briefing">Briefing</button><button id="tab-history" data-page="history">Histórico</button><button id="tab-settings" data-page="settings">Configurações</button></nav>
+
+    <nav class="bottom-nav" aria-label="Áreas da extensão">
+      <button id="tab-briefing" class="active" data-page="briefing"><span aria-hidden="true">▤</span>Briefing</button>
+      <button id="tab-history" data-page="history"><span aria-hidden="true">◷</span>Histórico</button>
+      <button id="tab-settings" data-page="settings"><span aria-hidden="true">⚙</span>Configurações</button>
+    </nav>
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
   </div>
   <script src="briefing-view.js"></script>

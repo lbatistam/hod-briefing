@@ -25,7 +25,7 @@
   const BUTTON_ID = "hod-v2-briefing-button";
   const POSITION_KEY = "hod-v2-briefing-button-position";
   const DEFAULT_SETTINGS = {
-    enabled: true, displayMode: "conversation", buttonSize: "normal", buttonTheme: "auto", customColor: "#0aa69b",
+    enabled: true, displayMode: "conversation", buttonSize: "normal", buttonTheme: "auto", customColor: "#0aa69b", showStatus: true,
     iconOnly: false, buttonLabel: "Briefing", agentName: "FELIPE",
     groupMessages: true, includeContactHeader: true, ...HOD_CONFIG.defaults
   };
@@ -857,7 +857,7 @@
       if (index === 0 && header) return `<p><strong>${escapeHtml(header[1])}</strong></p>`;
       const chips = [...line.matchAll(/`([^`]+)`/g)].map(match => match[1].trim()).filter(Boolean);
       if (chips.length && line.replace(/`[^`]+`|　|\s/g, "") === "") {
-        return `<p>${chips.map(chip => `<strong><code>${escapeHtml(chip)}</code></strong>`).join("<br>")}</p>`;
+        return `<p>${chips.map(chip => `<strong><code>${escapeHtml(chip)}</code></strong>`).join("&nbsp;")}</p>`;
       }
       const code = line.match(/^`([^`]+)`$/);
       // O GoHighLevel remove estilos inline do HTML colado. A tag semântica
@@ -892,7 +892,7 @@
     return output.reduce((text, line, index) => {
       const previous = output[index - 1] || "";
       const consecutiveCodes = /^`[^`]+`$/.test(line) && /^`[^`]+`$/.test(previous);
-      // Tópicos interpretativos e Perfil do GHL formam listas compactas;
+      // Tópicos interpretativos e Perfil do Lead formam listas compactas;
       // o espaço fica entre blocos, não entre itens da mesma lista.
       const consecutiveListItems = /^(?:•|[\p{Extended_Pictographic}])/u.test(line) && /^(?:•|[\p{Extended_Pictographic}])/u.test(previous);
       return text + (index ? (consecutiveCodes || consecutiveListItems ? "\n" : "\n\n") : "") + line;
@@ -1210,8 +1210,10 @@
     if (whatsappWithProfile) {
       profile.push("Lead do WhatsApp");
       if (score) profile.push(`Score ${score}`);
+      const occupation = normalize(data?.perfil?.ocupacao);
+      if (occupation && occupation.length <= 60) profile.push(titleProfileLabel(occupation));
       const situation = validFieldValue(contactData["Situação"], "Situação");
-      if (situation) profile.push(situation.charAt(0).toLocaleUpperCase("pt-BR") + situation.slice(1));
+      if (situation && !profile.some(item => normalize(item).toLocaleLowerCase("pt-BR") === normalize(situation).toLocaleLowerCase("pt-BR"))) profile.push(situation.charAt(0).toLocaleUpperCase("pt-BR") + situation.slice(1));
     } else if (!instagramWithoutScore) {
       if (score) profile.push(`Score ${score}`);
       const age = validFieldValue(contactData.Idade, "Idade");
@@ -1350,7 +1352,7 @@
       .trim();
     if (summary && (isLowValueLeadChatter(summary) || /\b(?:consultoria|google meet|dispost[oa] a participar)\b/i.test(summary))) summary = "";
 
-    // Dados do Perfil do GHL são apresentados como fatos separados, e não
+    // Dados do Perfil do Lead são apresentados como fatos separados, e não
     // entregues ao modelo como história. Isso mantém idade, score e renda
     // exatos, evita inferências e deixa o HTML colado no CRM fácil de ler.
     const ghlProfileLines = [];
@@ -1381,17 +1383,15 @@
 
     return sanitizeFinalBriefing([
       `**${nome}**`,
-      // Cada informação estética ocupa seu próprio bloco. Além de facilitar a
-      // leitura no modal, isso produz parágrafos separados no HTML copiado e
-      // evita que profissão/situação fiquem espremidas ao lado da origem.
-      profile.length ? profile.map(item => `\`${item}\``).join("\n\n") : "",
+      // Tags ficam no mesmo bloco para o HTML copiado mantê-las lado a lado.
+      profile.length ? profile.map(item => `\`${item}\``).join(" ") : "",
       summary,
       // As leituras da conversa são uma lista única: o GHL recebe uma linha
       // por emoji, sem criar um "Shift+Enter" visual entre elas.
       ...(lines.length ? [(summary ? lines.slice(0, Number(currentSettings.topicCount || 4)) : lines).join("\n")] : []),
       // Uma única sequência preserva a lista visual compacta no HTML do GHL:
       // há respiro antes do perfil, mas não entre seus próprios tópicos.
-      ...(ghlProfileLines.length ? ["**Perfil do GHL**", ghlProfileLines.join("\n")] : [])
+      ...(ghlProfileLines.length ? ["**Perfil do Lead**", ghlProfileLines.join("\n")] : [])
     ].filter(Boolean).join("\n\n"));
   }
 
@@ -1986,6 +1986,7 @@
     button.dataset.size = currentSettings.buttonSize;
     button.dataset.theme = currentSettings.buttonTheme;
     button.dataset.iconOnly = currentSettings.iconOnly ? "true" : "false";
+    button.dataset.showStatus = currentSettings.showStatus === false ? "false" : "true";
     const color = /^#[0-9a-f]{6}$/i.test(currentSettings.customColor || "") ? currentSettings.customColor : "#0aa69b";
     const rgb = [1,3,5].map(i => parseInt(color.slice(i,i+2),16));
     const luminance = (0.2126*rgb[0]+0.7152*rgb[1]+0.0722*rgb[2])/255;

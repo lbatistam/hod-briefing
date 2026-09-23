@@ -7,7 +7,7 @@ globalThis.HOD_CONFIG = Object.freeze({
     aiModel: "groq-gpt-oss-120b", reasoning: "medium", aiPreset: "balanced",
     timeoutSeconds: 35, retries: 1, captureSpeed: "safe", topicCount: 4,
     uiTheme: "system", accentColor: "#206bc4", density: "comfortable", motionStyle: "smooth",
-    resultLayout: "modal", historyEnabled: false, exportFormat: "ghl"
+    resultLayout: "modal", historyEnabled: false, exportFormat: "ghl", showStatus: true
   },
   presets: {
     fast: { reasoning: "low", timeoutSeconds: 20, retries: 0 },

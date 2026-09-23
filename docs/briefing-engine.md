@@ -1,27 +1,51 @@
-# Motor universal de briefing
+# Motor de briefing
 
-Esta é a regra canônica do HOD Briefing V2 para captura, perfil e saída. O motor roda na própria extensão (`content.js` e `background.js`); não há uma API de Briefing no backend do HOD Hub. Mudanças neste contrato devem atualizar os testes e este documento juntos.
+O HOD Briefing roda na própria extensão: `content.js` captura e apresenta, `background.js` chama a Groq e `briefing.md` é o contrato editorial. Não existe API, banco ou backend compartilhado com o HOD Hub.
 
-## Origem dos fatos
+## Contrato de saída
 
-- Conversa: usar falas do lead como evidência. Fala do SDR não é fato do lead.
-- CRM: campos confirmados do contato podem complementar o WhatsApp. Valor vazio, placeholder, cabeçalho de seção ou valor igual ao nome do campo deve ser descartado.
-- Nunca inferir idade, renda, score, estrutura, investimento ou disponibilidade a partir do tom da conversa.
+O modelo devolve JSON validado por evidência. O motor transforma esse JSON no briefing copiável:
+
+```text
+Nome
+tags confirmadas
+resumo humanizado
+tópicos complementares
+Perfil do Lead (somente WhatsApp, se houver dados reais)
+```
+
+Tags são geradas em uma única linha e copiadas como HTML semântico `<strong><code>…</code></strong>`. O GHL remove estilos inline; por isso a extensão não depende de `style`, classes ou cores para manter as tags.
 
 ## Regra por canal
 
-| Canal | Identificação | Perfil do GHL | Score e campos do formulário |
+| Canal | Tags | Perfil do Lead | Campos do formulário |
 | --- | --- | --- | --- |
-| WhatsApp | `Lead do WhatsApp` | Mostrar apenas linhas com valores válidos | Mostrar se existirem e forem válidos |
-| Instagram | `Lead do Instagram` | Nunca mostrar | Nunca mostrar no briefing |
-| Desconhecido | `Lead do CRM` | Não mostrar | Não presumir origem |
+| WhatsApp | `Lead do WhatsApp`, Score válido e ocupação/situação comprovadas | Mostrar somente linhas com valores válidos | Permitidos, como fatos objetivos |
+| Instagram | `Lead do Instagram` e ocupação/situação comprovadas | Nunca mostrar | Nunca mostrar |
+| Desconhecido | `Lead do CRM` e apenas dados confirmados | Nunca presumir | Nunca presumir |
 
-O perfil detalhado do GHL fica separado do resumo e dos tópicos, sem emojis. `Capacidade para investir: Origem` é erro de leitura do cabeçalho **Origem**, não uma resposta. O parser rejeita esse e outros cabeçalhos de seção antes de enviar dados à IA ou construir o briefing.
+`Perfil do Lead` não é diagnóstico comercial. Idade, estado, computador, renda, tempo disponível, formação, experiência, situação financeira e capacidade de investimento são apenas fatos informativos. Score aparece na tag do WhatsApp, nunca dentro do bloco.
 
-## Saída
+## Repetição e emojis
 
-Nome, canal e profissão/situação quando confirmados; resumo útil; tópicos novos com poucos emojis em linhas próprias; `Perfil do GHL` apenas no WhatsApp. HTML para o editor do GHL preserva tags semânticas (`strong`, `code`, `br`, `p`) e separa cabeçalho, resumo e listas. A camada visual da V2 usa `briefing-view.js` para apresentar o mesmo texto em cartões e tópicos, sem alterar o conteúdo copiado.
+- O resumo conta a história; tags classificam; tópicos acrescentam fatos novos.
+- Cada tópico recebe no máximo um emoji, escolhido pelo tipo do fato.
+- Não repetir profissão, objetivo ou frase do resumo nos tópicos.
+- Não usar emoji no Perfil do Lead nem para preencher espaço.
+
+## Proteções
+
+- Falas do SDR não viram fatos do lead.
+- Campos vazios, `---`, cabeçalhos como `Origem` e valores inválidos são descartados.
+- Agenda, links, telefone, e-mail, automações e confirmação de reunião não vão para o briefing.
+- O HTML permitido é limitado a `p`, `strong`, `code` e `br` antes da cópia.
 
 ## Verificação mínima
 
-`node tests/regression.js`, `node tests/provider.test.js` e `node tests/central.test.js`. Também validar no Chrome com um contato de WhatsApp e outro de Instagram, incluindo cópia rica no GHL. Teste local não prova captura, edição ou colagem em produção.
+```text
+node tests/regression.js
+node tests/provider.test.js
+node tests/central.test.js
+```
+
+Depois da recarga no Chrome, validar uma conversa real de cada canal e a colagem no editor do GHL. Teste local não comprova captura real, geração real ou colagem.
