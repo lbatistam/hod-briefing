@@ -109,6 +109,38 @@ function modelOutputQuality(data, source) {
   return { valid: hasSummary && valuableTopics.length >= minimum && valuableTopics.length === topics.length && topics.length <= 4, usefulEvidence: usefulEvidence.length, valuableTopics: valuableTopics.length };
 }
 
+function leadEvidenceLines(source) {
+  return String(source || "").split("\n")
+    .filter(line => /^(?:RESPOSTA DO LEAD|CRM \(FATO|FATO CONTEXTUALIZADO)/.test(line))
+    .map(line => line.replace(/^[^:]+:\s*/, "").trim())
+    .filter(Boolean);
+}
+
+function evidenceWords(value) {
+  const ignored = new Set(["para", "como", "mais", "menos", "muito", "pouco", "sobre", "porque", "quando", "onde", "esse", "essa", "isso", "tenho", "tem", "trabalho", "trabalhar", "busca", "quer", "quero", "lead"]);
+  return new Set(String(value || "").toLocaleLowerCase("pt-BR").normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s]/g, " ").split(/\s+/)
+    .filter(word => word.length >= 4 && !ignored.has(word)));
+}
+
+// O modelo às vezes altera flexão ou pontuação da citação literal. Nesse caso,
+// aceitamos somente uma correspondência semântica curta com uma fala do lead;
+// a camada de apresentação ainda elimina qualquer tópico sem base na conversa.
+function evidenceMatchesLead(quote, lines) {
+  const normalizedQuote = String(quote || "").trim().toLocaleLowerCase("pt-BR");
+  if (normalizedQuote.length < 4) return false;
+  if (lines.some(line => line.toLocaleLowerCase("pt-BR").includes(normalizedQuote))) return true;
+  const claim = evidenceWords(quote);
+  if (!claim.size) return false;
+  return lines.some(line => {
+    const facts = evidenceWords(line);
+    const matches = [...claim].filter(word => facts.has(word)).length;
+    const minimum = claim.size <= 2 ? claim.size : Math.max(2, Math.ceil(claim.size * .55));
+    return matches >= minimum;
+  });
+}
+
 function redactSensitiveData(source) {
   return String(source || "")
     .replace(/\b(?:\d{3}\.\d{3}\.\d{3}-\d{2}|\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2})\b/g, "[DOCUMENTO REMOVIDO]")
@@ -233,12 +265,13 @@ async function callAi(conversation, ownsLock = false) {
   }
   const parsed = parseModelBriefing(answer.content);
   if (!parsed.data.resumo || parsed.recovered) throw new Error("A IA devolveu uma resposta incompleta. Nada foi inventado para preencher o briefing.");
-  // Evidence validation uses only lead/form lines, never the salesperson's claims.
-  const evidence = limited.text.split("\n").filter(line => /^(?:RESPOSTA DO LEAD|CRM \(FATO|FATO CONTEXTUALIZADO)/.test(line)).join(" ").toLocaleLowerCase("pt-BR");
-  parsed.data.topicos = parsed.data.topicos.filter(t => t.evidencia.length >= 4 && evidence.includes(t.evidencia.toLocaleLowerCase("pt-BR"))).slice(0, options.topicCount);
-  if (!parsed.data.perfil.evidencia || !evidence.includes(parsed.data.perfil.evidencia.toLocaleLowerCase("pt-BR"))) parsed.data.perfil = { ocupacao: "", situacao: "", evidencia: "" };
+  // Validação usa exclusivamente falas do lead/formulário, nunca alegações do SDR.
+  // Não bloqueie um briefing bom apenas porque o modelo flexionou uma evidência.
+  const evidenceLines = leadEvidenceLines(limited.text);
+  if (!evidenceLines.length) throw new Error("A captura não contém respostas do lead nem dados do formulário para gerar o briefing.");
+  parsed.data.topicos = parsed.data.topicos.filter(t => t.evidencia.length >= 4 && evidenceMatchesLead(t.evidencia, evidenceLines)).slice(0, options.topicCount);
+  if (!parsed.data.perfil.evidencia || !evidenceMatchesLead(parsed.data.perfil.evidencia, evidenceLines)) parsed.data.perfil = { ocupacao: "", situacao: "", evidencia: "" };
   const quality = modelOutputQuality(parsed.data, limited.text);
-  if (!parsed.data.topicos.length) throw new Error("Não foi possível validar fatos relevantes na resposta. Revise a captura antes de tentar novamente.");
   return {
     data: parsed.data,
     model: answer.model,

@@ -1,11 +1,22 @@
 # Changelog
 
+## 2.2.2 · origem fora das tags
+
+- O popup também deixa de exibir a origem da conversa como chip. A faixa abaixo do nome contém somente as tags úteis do briefing.
+
+## 2.2.1 · validação e tags mais limpas
+
+- Corrigido o bloqueio indevido “Não foi possível validar fatos relevantes na resposta”.
+- A extensão continua aceitando apenas fatos do lead ou formulário, mas tolera diferenças pequenas de flexão e pontuação entre a citação da IA e a conversa capturada.
+- Sem fatos capturados, a geração continua bloqueada de forma explícita.
+- Removidas as tags de origem (`Lead do WhatsApp`, `Lead do Instagram` e `Lead do CRM`). O cabeçalho agora mostra apenas profissão, situação e Score válido no WhatsApp.
+
 ## 2.2.0 · Contrato de briefing oficial
 
 - HOD Briefing passa a ser o nome oficial da extensão; a implementação anterior foi aposentada e a pasta atual se torna a única instalação oficial.
 - `briefing.md` foi reescrito como contrato editorial: tags classificam, resumo conta a história e tópicos adicionam fatos sem repetir a narrativa.
 - Tags do cabeçalho agora são copiadas na mesma linha, com HTML semântico compatível com o GHL.
-- WhatsApp gera `Lead do WhatsApp`, Score válido e perfil comprovado; seus campos reais aparecem no bloco **Perfil do Lead**. Instagram mantém apenas tags de origem e perfil confirmado, sem Score nem formulário.
+- WhatsApp gera Score válido e perfil comprovado; seus campos reais aparecem no bloco **Perfil do Lead**. Instagram mantém apenas perfil confirmado, sem Score nem formulário.
 - O antigo nome **Perfil do GHL** foi removido da geração, visualização, testes e documentação.
 - Arquivos visuais sem uso da implementação anterior foram removidos; o preview local cobre somente o popup oficial.
 

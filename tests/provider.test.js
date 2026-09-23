@@ -1,6 +1,8 @@
 const fs=require("node:fs"),vm=require("node:vm"),assert=require("node:assert/strict");
 let attempts=0, failures=0, status=500, sent=[], options={};
-const data={nome:"Pedro",perfil:{ocupacao:"Ator",situacao:"Por projetos",evidencia:"Sou ator e trabalho por projeto."},resumo:"Busca renda previsível para manter a carreira de ator.",topicos:[{tipo:"objetivo",texto:"Busca renda previsível",evidencia:"Busco renda previsível."}]};
+// A resposta devolve uma pequena variação de flexão; isso não pode derrubar uma
+// geração válida cuja conversa contenha os mesmos fatos.
+const data={nome:"Pedro",perfil:{ocupacao:"Ator",situacao:"Por projetos",evidencia:"Sou ator e trabalho por projetos."},resumo:"Busca renda previsível para manter a carreira de ator.",topicos:[{tipo:"objetivo",texto:"Busca renda previsível",evidencia:"Busco uma renda previsível."}]};
 const context={console,AbortController,performance,setTimeout:(fn,ms)=>setTimeout(fn,ms<=2000?0:ms),clearTimeout,importScripts(){},
  chrome:{runtime:{getURL:()=> "prompt",onMessage:{addListener(){}},onInstalled:{addListener(){}}},
  storage:{sync:{get:async d=>({...d,...options})},local:{get:async()=>({groqApiKey:"test-key-not-real"})}}},

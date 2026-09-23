@@ -51,8 +51,7 @@ function renderBriefing(result) {
   $("generate").textContent = result ? "Gerar novamente" : "Gerar briefing";
   if (!result) return;
   $("lead-name").textContent = result.name || "Lead";
-  $("lead-channel").textContent = result.channel === "whatsapp" ? "Lead do WhatsApp" : result.channel === "instagram" ? "Lead do Instagram" : "Lead do CRM";
-  $("lead-chips").querySelectorAll(".small-chip:not(#lead-channel)").forEach(node => node.remove());
+  $("lead-chips").replaceChildren();
   for (const chip of result.chips || []) { const node = document.createElement("span"); node.className = "small-chip"; node.textContent = chip; $("lead-chips").append(node); }
   $("avatar").textContent = (result.name || "L").split(/\s+/).slice(0,2).map(part => part[0]).join("").toUpperCase();
   const preview = $("briefing-preview");

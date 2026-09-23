@@ -50,11 +50,11 @@ const content = contentFunctions();
 const viewContext = {};
 vm.createContext(viewContext);
 vm.runInContext(fs.readFileSync("briefing-view.js", "utf8"), viewContext);
-const viewData = viewContext.HOD_BRIEFING_VIEW.parse("**Nair**\n\n`Lead do WhatsApp` `Score 31` `Autônoma`\n\nBusca renda extra\n\n🎯 Quer trabalhar de casa\n💬 Tem dúvida sobre custos\n\n**Perfil do Lead**\n\n• 41 anos · São Paulo");
+const viewData = viewContext.HOD_BRIEFING_VIEW.parse("**Nair**\n\n`Score 31` `Autônoma`\n\nBusca renda extra\n\n🎯 Quer trabalhar de casa\n💬 Tem dúvida sobre custos\n\n**Perfil do Lead**\n\n• 41 anos · São Paulo");
 assert.strictEqual(viewData.summary, "Busca renda extra");
 assert.strictEqual(viewData.topics.length, 2);
 assert.strictEqual(viewData.profile.length, 1);
-const editedView = viewContext.HOD_BRIEFING_VIEW.parse("Nair\nLead do WhatsApp\nAutônoma\nBusca renda extra\n🎯 Quer trabalhar de casa", "Nair", ["Autônoma"]);
+const editedView = viewContext.HOD_BRIEFING_VIEW.parse("Nair\nAutônoma\nBusca renda extra\n🎯 Quer trabalhar de casa", "Nair", ["Autônoma"]);
 assert.strictEqual(editedView.summary, "Busca renda extra", "Depois da edição, nome e perfil não podem virar resumo visual");
 assert.strictEqual(content.validFieldValue("Origem", "Capacidade para investir"), "", "Cabeçalho do CRM não pode ser tratado como capacidade financeira");
 const whatsappProfileFixture = content.formatAiBriefing({ nome: "Nair", resumo: "Busca renda extra", topicos: [] }, "Nair", { "Capacidade para investir": "Origem", Idade: "41", Estado: "São Paulo" }, "whatsapp", "");
@@ -63,9 +63,10 @@ assert(/\*\*Perfil do Lead\*\*/.test(whatsappProfileFixture), "Perfil do Lead v�
 const instagramProfileFixture = content.formatAiBriefing({ nome: "Nair", resumo: "Busca renda extra", topicos: [] }, "Nair", { Idade: "41", Score: "31", Estado: "São Paulo", "Capacidade para investir": "R$ 500" }, "instagram", "");
 assert(!/Perfil do Lead|Score 31|41 anos|Capacidade para investir/i.test(instagramProfileFixture), "Campos do formulário não pertencem ao briefing do Instagram");
 const whatsappTagsFixture = content.formatAiBriefing({ nome: "Nair", perfil: { ocupacao: "Freelancer", situacao: "", evidencia: "sou freelancer" }, resumo: "Busca renda extra", topicos: [] }, "Nair", { Score: "31", Situação: "Autônoma" }, "whatsapp", "RESPOSTA DO LEAD: sou freelancer");
-assert(/`Lead do WhatsApp` `Score 31` `Freelancer` `Autônoma`/.test(whatsappTagsFixture), "WhatsApp deve gerar tags de canal, Score e perfil na mesma linha");
-const richTags = content.briefingClipboardFormats("**Nair**\n\n`Lead do WhatsApp` `Score 31` `Autônoma`\n\nBusca renda extra");
-assert(/<code>Lead do WhatsApp<\/code><\/strong>&nbsp;<strong><code>Score 31<\/code>/.test(richTags.html), "Tags precisam sair lado a lado no HTML para GHL");
+assert(/`Score 31` `Freelancer` `Autônoma`/.test(whatsappTagsFixture), "WhatsApp deve gerar Score e perfil na mesma linha");
+assert(!/Lead do WhatsApp|Lead do Instagram|Lead do CRM/i.test(whatsappTagsFixture), "A origem do canal não deve virar tag");
+const richTags = content.briefingClipboardFormats("**Nair**\n\n`Score 31` `Autônoma`\n\nBusca renda extra");
+assert(/<code>Score 31<\/code><\/strong>&nbsp;<strong><code>Autônoma<\/code>/.test(richTags.html), "Tags precisam sair lado a lado no HTML para GHL");
 const inboundBubble = { className: "relative user-message chat-bubble-inbound", parentElement: null, getAttribute() { return ""; } };
 const inboundText = { className: "chat-message", parentElement: inboundBubble, getAttribute() { return ""; }, getBoundingClientRect() { return { left: 100, width: 200 }; } };
 const fakeScroller = { getBoundingClientRect() { return { left: 0, width: 1000 }; } };
@@ -266,7 +267,7 @@ assert(/CRM \(FATO DO FORMULÁRIO\): Investimento: R\$ 400 por mês/i.test(crmSo
 const crmBriefing = content.formatAiBriefing({ nome: "Elisa", topicos: [] }, "Elisa", {
   Computador: "Sim", "Tempo disponível": "Menos de 2 horas", Investimento: "R$ 400 por mês", Reserva: "Não"
 }, "whatsapp", crmSource);
-assert(/Lead do WhatsApp/i.test(crmBriefing));
+assert(!/Lead do WhatsApp|Lead do Instagram|Lead do CRM/i.test(crmBriefing));
 assert(/• Computador: Sim · Tempo: Menos de 2 horas/i.test(crmBriefing));
 assert(/R\$ 400 por mês/i.test(crmBriefing));
 
@@ -276,7 +277,7 @@ const whatsappProfileBriefing = content.formatAiBriefing({ nome: "Nair Santana",
   "Situação": "Empreendedor(a) / Autônomo(a)", "Formação": "Ensino superior completo ou pós-graduação",
   "Experiência": "É a primeira vez que estou conhecendo esse tipo de trabalho", "Situação financeira": "---", "Capacidade para investir": "---"
 }, "whatsapp", "");
-for (const expected of ["Lead do WhatsApp", "Score 31", "41 anos · São Paulo · Mulher", "• Computador: Sim · Tempo: Menos de 2 horas", "• Renda: Até R$ 1.500", "• Formação: Ensino superior completo ou pós-graduação"]) {
+for (const expected of ["Score 31", "41 anos · São Paulo · Mulher", "• Computador: Sim · Tempo: Menos de 2 horas", "• Renda: Até R$ 1.500", "• Formação: Ensino superior completo ou pós-graduação"]) {
   assert(whatsappProfileBriefing.includes(expected), `Perfil do WhatsApp deve preservar: ${expected}`);
 }
 assert(!/---/.test(whatsappProfileBriefing), "Campos vazios do CRM não entram no briefing");
@@ -304,7 +305,7 @@ const pedroActorBriefing = content.formatAiBriefing({ nome: "Pedro Garcia", topi
   { tipo: "objetivo", texto: "Busca previsibilidade de renda sem abrir mão da flexibilidade", evidencia: "garantir previsibilidade da renda com a flexibilidade" },
   { tipo: "dificuldade", texto: "Considera a área atual desgastante", evidencia: "Desgastante sim" }
 ] }, "Pedro Garcia", {}, "instagram", pedroActorSource);
-assert(/`Lead do Instagram`/i.test(pedroActorBriefing));
+assert(!/Lead do Instagram/i.test(pedroActorBriefing));
 assert(/`Ator`/i.test(pedroActorBriefing));
 assert(/`Por projetos`/i.test(pedroActorBriefing));
 assert(!/Fonte: Instagram|Tudo certo Felipe/i.test(pedroActorBriefing));
@@ -325,7 +326,7 @@ const fernandoPolluted = content.enrichConversationBriefing({ nome: "Fernando Go
   { tipo: "positivo", texto: "Disposto a participar", evidencia: "sim" }
 ] }, fernandoConversation);
 const fernandoBriefing = content.formatAiBriefing(fernandoPolluted, "Fernando Godoy", {}, "instagram", fernandoSource);
-assert(/`Lead do Instagram`/i.test(fernandoBriefing));
+assert(!/Lead do Instagram/i.test(fernandoBriefing));
 assert(/`Gerente de loja de móveis e decoração`/i.test(fernandoBriefing));
 assert(/`Desempregado\(a\)`/i.test(fernandoBriefing));
 assert(!/Boa tarde|Conheceu o contato hoje|Disposto a participar/i.test(fernandoBriefing));
@@ -357,7 +358,7 @@ assert(!/📌|Perfil:|computador|2 horas|curso|Claro meu amigo/i.test(felipeBrie
 
 const clipboard = content.briefingClipboardFormats(amandaBriefing);
 assert(/<strong>Amanda Arndt<\/strong>/i.test(clipboard.html));
-assert(/<strong><code>Lead do Instagram<\/code><\/strong>/i.test(clipboard.html));
+assert(!/<strong><code>Lead do Instagram<\/code><\/strong>/i.test(clipboard.html));
 assert(!/<span\b|\sstyle=/i.test(clipboard.html), "O GHL remove estilos inline; o marcador precisa ser HTML semântico");
 const contentSource = fs.readFileSync("content.js", "utf8");
 assert(/copyRichBriefing\(editor, finalText, richHtml\)/.test(contentSource), "O botão deve copiar o DOM rico visível");
@@ -366,9 +367,9 @@ assert(/event\.clipboardData\.setData\("text\/html", html\)/.test(contentSource)
 assert(/document\.addEventListener\("copy", writeRichClipboard, true\)/.test(contentSource), "A cópia rica deve interceptar listeners do CRM");
 assert(!/\*\*|`/.test(clipboard.html));
 const verticalProfile = content.formatAiBriefing({ nome: "Ayonnara Suyane", resumo: "Busca uma nova oportunidade", topicos: [{ tipo: "trabalho", texto: "Trabalha como auxiliar de atendimento", evidencia: "auxiliar de atendimento" }] }, "Ayonnara Suyane", {}, "instagram", "RESPOSTA DO LEAD (EVIDÊNCIA LITERAL): Trabalho como auxiliar de atendimento");
-assert(/`Lead do Instagram` `Auxiliar de atendimento`/i.test(verticalProfile), "Tags devem ficar juntas na mesma linha");
+assert(/`Auxiliar de atendimento`/i.test(verticalProfile), "Tags devem exibir apenas informação relevante");
 const verticalClipboard = content.briefingClipboardFormats(verticalProfile);
-assert(/<code>Lead do Instagram<\/code><\/strong>&nbsp;<strong><code>Auxiliar de atendimento<\/code>/i.test(verticalClipboard.html), "Tags devem compartilhar um parágrafo e ficar lado a lado");
+assert(/<code>Auxiliar de atendimento<\/code>/i.test(verticalClipboard.html), "Tags devem ser copiadas em HTML semântico");
 const compactEmojiClipboard = content.briefingClipboardFormats("💼 Freelancer, busca algo mais fixo\n🧠 Começou a acompanhar o mercado a partir de um anúncio");
 assert(/Freelancer, busca algo mais fixo<br>🧠 Começou/i.test(compactEmojiClipboard.html), "Emojis consecutivos precisam virar linhas reais no HTML do GHL");
 const mirianConversation = [
@@ -380,7 +381,8 @@ const mirianBriefing = content.formatAiBriefing(
   content.enrichConversationBriefing({ nome: "Mirian Santos", topicos: [] }, mirianConversation),
   "Mirian Santos", {}, "instagram", content.aiInput(mirianConversation, "instagram", {})
 );
-assert(/`Lead do Instagram` `Aposentada`/i.test(mirianBriefing), "Instagram deve mostrar canal e situação confirmada");
+assert(/`Aposentada`/i.test(mirianBriefing), "Instagram deve mostrar situação confirmada");
+assert(!/Lead do Instagram/i.test(mirianBriefing), "Instagram não deve expor a origem como tag");
 assert(/Trabalhou na Fiat antes de se aposentar/i.test(mirianBriefing));
 assert(/Busca aumentar a renda/i.test(mirianBriefing));
 assert(/Conheceu o Felipe recentemente/i.test(mirianBriefing));

@@ -47,8 +47,9 @@ Os tipos permitidos são: `trabalho`, `formacao`, `localidade`, `familia`, `obje
 
 As tags são curtas, confirmadas e servem para escanear o perfil. O motor escolhe a apresentação; você só deve devolver `ocupacao` e `situacao` quando a evidência literal existir.
 
-- Instagram: origem + ocupação e/ou situação comprovadas
-- WhatsApp: origem + Score válido do formulário + ocupação e/ou situação comprovadas
+- Instagram: ocupação e/ou situação comprovadas
+- WhatsApp: Score válido do formulário + ocupação e/ou situação comprovadas
+- Não escreva a origem do canal como tag (`Lead do WhatsApp`, `Lead do Instagram` ou semelhante)
 - Nunca inventar profissão a partir de formação, interesse, saudação ou da pergunta do SDR
 - Não repetir em tag uma frase inteira, objetivo ou disponibilidade
 

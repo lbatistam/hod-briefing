@@ -23,9 +23,9 @@ const data={nome:"Ana Paula",resumo:"Busca recolocação para ficar mais perto d
 const text=c.formatAiBriefing(data,"Ana Paula",{},"instagram",evidence);
 const out=c.briefingClipboardFormats(text);
 assert(!text.includes("Tô bem"));
-assert(out.html.includes("<code>Lead do Instagram</code></strong>&nbsp;<strong><code>Administração</code></strong>&nbsp;<strong><code>Desempregada</code>"));
+assert(out.html.includes("<code>Administração</code></strong>&nbsp;<strong><code>Desempregada</code>"));
 assert(out.html.includes("</code></strong></p><p><br></p><p>"));
-assert(out.plain.includes("Lead do Instagram Administração Desempregada"));
+assert(out.plain.includes("Administração Desempregada"));
 assert(!source.includes("const briefingData = enrichConversationBriefing(result.data"));
 assert.equal(context.HOD_CONFIG.defaults.historyEnabled,false);
 const titled=c.formatAiBriefing({...data,perfil:{ocupacao:"Social Media",situacao:"CLT",evidencia:"Sou social media CLT"}}, "Renan", {}, "instagram", "RESPOSTA DO LEAD: Sou social media CLT");

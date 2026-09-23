@@ -1113,7 +1113,7 @@
 
   function instagramProfileChips(evidenceSource, topics, semanticProfile) {
     if (semanticProfile) {
-      const chips = ["Lead do Instagram"];
+      const chips = [];
       const literal = String(evidenceSource || "").split("\n").filter(line => /^(?:RESPOSTA DO LEAD|CRM \(FATO)/.test(line)).join(" ");
       const evidence = normalize(semanticProfile.evidencia);
       if (evidence.length >= 4 && literal.toLocaleLowerCase("pt-BR").includes(evidence.toLocaleLowerCase("pt-BR"))) {
@@ -1163,7 +1163,7 @@
     else if (/\bCLT\b/i.test(allFacts)) situation = "CLT";
     else if (/\b(?:motorista de aplicativo|uber|aut[oô]nomo[a]?)\b/i.test(allFacts)) situation = "Autônomo";
     else if (/\b(?:trabalho|atua|recebo|ganho)\s+por projetos?\b|\bentre (?:um )?projeto e outro\b/i.test(allFacts)) situation = "Por projetos";
-    const chips = ["Lead do Instagram"];
+    const chips = [];
     if (role) chips.push(role.charAt(0).toLocaleUpperCase("pt-BR") + role.slice(1));
     if (situation && !new RegExp(`^${situation}$`, "i").test(role)) chips.push(situation);
     return chips.slice(0, 3);
@@ -1208,7 +1208,6 @@
     const instagramWithoutScore = channel === "instagram";
     const whatsappWithProfile = channel === "whatsapp";
     if (whatsappWithProfile) {
-      profile.push("Lead do WhatsApp");
       if (score) profile.push(`Score ${score}`);
       const occupation = normalize(data?.perfil?.ocupacao);
       if (occupation && occupation.length <= 60) profile.push(titleProfileLabel(occupation));

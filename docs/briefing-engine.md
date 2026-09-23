@@ -20,11 +20,11 @@ Tags são geradas em uma única linha e copiadas como HTML semântico `<strong><
 
 | Canal | Tags | Perfil do Lead | Campos do formulário |
 | --- | --- | --- | --- |
-| WhatsApp | `Lead do WhatsApp`, Score válido e ocupação/situação comprovadas | Mostrar somente linhas com valores válidos | Permitidos, como fatos objetivos |
-| Instagram | `Lead do Instagram` e ocupação/situação comprovadas | Nunca mostrar | Nunca mostrar |
-| Desconhecido | `Lead do CRM` e apenas dados confirmados | Nunca presumir | Nunca presumir |
+| WhatsApp | Score válido e ocupação/situação comprovadas | Mostrar somente linhas com valores válidos | Permitidos, como fatos objetivos |
+| Instagram | Ocupação e/ou situação comprovadas | Nunca mostrar | Nunca mostrar |
+| Desconhecido | Apenas dados confirmados | Nunca presumir | Nunca presumir |
 
-`Perfil do Lead` não é diagnóstico comercial. Idade, estado, computador, renda, tempo disponível, formação, experiência, situação financeira e capacidade de investimento são apenas fatos informativos. Score aparece na tag do WhatsApp, nunca dentro do bloco.
+`Perfil do Lead` não é diagnóstico comercial. Idade, estado, computador, renda, tempo disponível, formação, experiência, situação financeira e capacidade de investimento são apenas fatos informativos. Score aparece na tag do WhatsApp, nunca dentro do bloco. A origem do canal nunca é uma tag do briefing.
 
 ## Repetição e emojis
 
@@ -36,6 +36,7 @@ Tags são geradas em uma única linha e copiadas como HTML semântico `<strong><
 ## Proteções
 
 - Falas do SDR não viram fatos do lead.
+- A geração só falha se a captura não trouxer nenhuma resposta do lead ou fato do formulário. Uma pequena variação de flexão ou pontuação na citação da IA não descarta sozinha um briefing fundamentado.
 - Campos vazios, `---`, cabeçalhos como `Origem` e valores inválidos são descartados.
 - Agenda, links, telefone, e-mail, automações e confirmação de reunião não vão para o briefing.
 - O HTML permitido é limitado a `p`, `strong`, `code` e `br` antes da cópia.
