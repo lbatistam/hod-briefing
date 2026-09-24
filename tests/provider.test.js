@@ -29,5 +29,5 @@ vm.runInContext(fs.readFileSync("background.js","utf8")+"\nglobalThis.generate=c
  await assert.rejects(()=>context.generate(input),/test failure/);assert.equal(attempts,1);
  failures=0;attempts=0;const second=await context.generate(input);assert.equal(attempts,1);
  assert.equal(sent.at(-1).reasoning_effort,"low");assert.equal(second.data.topicos.length,1);
- console.log("Provider V1: GPT-OSS 120B, reasoning, retry 500, no retry 401, lock recovery, evidence filtering: OK");
+ console.log("Provider: GPT-OSS 120B, reasoning, retry 500, no retry 401, lock recovery, evidence filtering: OK");
 })().catch(e=>{console.error(e);process.exitCode=1;});

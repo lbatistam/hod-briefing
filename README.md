@@ -2,6 +2,8 @@
 
 Extensão Chrome privada oficial da Home Office Digital. Ela é independente do HOD Hub e transforma conversas do GoHighLevel em contexto prático para a consultoria.
 
+> **Produto único:** existe apenas HOD Briefing. A branch `main` é a extensão ativa e evolutiva; “V1” e “V2” são apenas referências informais ao escopo de uma atualização, nunca extensões paralelas.
+
 ## Arquitetura
 
 - `content.js`: captura do GHL, limpeza da conversa, composição do briefing e cópia rica.
@@ -12,6 +14,7 @@ Extensão Chrome privada oficial da Home Office Digital. Ela é independente do 
 - `docs/apple-design.md`: cópia íntegra do design MD enviado. O mesmo MD está no ZIP Stitch.
 - `docs/canvas-map.md`: mapeamento dos 10 canvases do ZIP Neutral Modern para as superfícies funcionais.
 - `docs/briefing-engine.md`: contrato canônico de tags, canais, Perfil do Lead e validação.
+- `docs/product-identity.md`: convenção de produto único e identificadores técnicos.
 
 O Briefing não usa o backend nem o banco do HOD Hub. A extensão captura no CRM e o processo de fundo chama a Groq. A chave fica no armazenamento local do Chrome, isolada por extensão.
 

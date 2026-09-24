@@ -1,5 +1,7 @@
 # Changelog
 
+> HOD Briefing é um único produto ativo. Os números abaixo são identificadores técnicos de builds já publicados; não representam extensões, instalações ou linhas de desenvolvimento paralelas.
+
 ## 2.2.6 · trajetória por área e home office sem repetição
 
 - “Tenho experiência nas áreas administrativa e judicial” passa a gerar a tag principal e o tópico profissional correspondente.
