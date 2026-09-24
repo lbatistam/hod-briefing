@@ -400,6 +400,19 @@ assert(/<strong><code>Despachante e empreiteiro<\/code><\/strong>/i.test(maurici
 const mauricioPastRole = content.formatAiBriefing({ nome: "Maurício Maldonado Filho", resumo: "Está desempregado e busca uma oportunidade em home office.", perfil: { ocupacao: "", situacao: "", evidencia: "" }, topicos: [] }, "Maurício Maldonado Filho", {}, "instagram", "RESPOSTA DO LEAD: Já mexi com despachante e empreiteiro na construção civil e hoje estou desempregado.");
 assert(/`Despachante e empreiteiro`/i.test(mauricioPastRole), "Função antiga declarada pelo lead também deve gerar uma tag principal");
 
+const rafaelLessaConversation = [
+  "CONTATO: Rafael Lessa",
+  "FELIPE:\nVocê já trabalhou de home office? E qual sua experiência?",
+  "RAFAEL:\nJá trabalhei home office, acho a modalidade ótima. Tenho experiência nas áreas administrativa e judicial.",
+  "FELIPE:\nConsegue conversar às 17h?",
+  "RAFAEL:\nSim, consigo"
+].join("\n\n");
+const rafaelLessaData = content.enrichConversationBriefing({ nome: "Rafael Lessa", resumo: "Rafael tem experiência nas áreas administrativa e judicial, já trabalhou em home office e está disponível para conversar às 17h.", perfil: { ocupacao: "", situacao: "", evidencia: "" }, topicos: [{ tipo: "mercado", texto: "Já trabalhei home office", evidencia: "Já trabalhei home office" }] }, rafaelLessaConversation);
+const rafaelLessaBriefing = content.formatAiBriefing(rafaelLessaData, "Rafael Lessa", {}, "instagram", content.aiInput(rafaelLessaConversation, "instagram", {}));
+assert(/`Administrativa e judicial`/i.test(rafaelLessaBriefing), "Experiência por áreas deve gerar a tag principal de Rafael Lessa");
+assert(/💼 Possui experiência nas áreas administrativa e judicial/i.test(rafaelLessaBriefing), "A trajetória profissional deve aparecer como tópico de trabalho");
+assert(!/🌐 Já trabalhei home office/i.test(rafaelLessaBriefing), "Experiência em home office não pode ser classificada como mercado");
+
 const rafaelConversation = [
   "CONTATO: Rafael Oliveira",
   "FELIPE:\nHoje você trabalha com o que?",

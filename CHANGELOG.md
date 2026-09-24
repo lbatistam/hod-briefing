@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.2.6 · trajetória por área e home office sem repetição
+
+- “Tenho experiência nas áreas administrativa e judicial” passa a gerar a tag principal e o tópico profissional correspondente.
+- Experiência anterior em home office é classificada como trabalho, nunca como conhecimento de mercado.
+- Tópicos genéricos da IA que repetem a mesma experiência remota são removidos antes da apresentação.
+
 ## 2.2.5 · tags e tópicos em todos os canais
 
 - A extração de profissão passa a funcionar igualmente em Instagram e WhatsApp, inclusive quando a IA não devolve `perfil` válido.

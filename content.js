@@ -1117,9 +1117,12 @@
       const literal = String(evidenceSource || "").split("\n").filter(line => /^(?:RESPOSTA DO LEAD|CRM \(FATO)/.test(line)).join(" ");
       const evidence = normalize(semanticProfile.evidencia);
       if (evidence.length >= 4 && literal.toLocaleLowerCase("pt-BR").includes(evidence.toLocaleLowerCase("pt-BR"))) {
-        for (const value of [semanticProfile.ocupacao, semanticProfile.situacao]) {
+        for (const [field, value] of [["ocupacao", semanticProfile.ocupacao], ["situacao", semanticProfile.situacao]]) {
           const chip = normalize(value);
-          if (chip && chip.length <= 60 && !isLowValueLeadChatter(chip) && !chips.includes(chip)) chips.push(chip);
+          // "Home office" descreve modalidade, não profissão. Uma resposta
+          // imprecisa do modelo não pode encerrar o fallback de tags reais.
+          const genericOccupation = field === "ocupacao" && /^(?:home office|trabalho remoto|remot[oa]|mercado|tecnologia|projetos?)$/i.test(chip);
+          if (chip && chip.length <= 60 && !genericOccupation && !isLowValueLeadChatter(chip) && !chips.includes(chip)) chips.push(chip);
         }
         if (chips.length) return chips;
       }
@@ -1149,6 +1152,7 @@
       const match = fact.match(/\b(?:eu\s+)?(?:sou|era|fui)\s+(?:um(?:a)?\s+)?([^.!?\n]{2,70})/i)
         || fact.match(/\b(?:trabalho|trabalha|atuo|atua|trabalhei|trabalhava|atuei|atuava)\s+(?:como\s+|de\s+|numa?\s+|no\s+|na\s+|na\s+[aá]rea\s+(?:de\s+)?|no\s+setor\s+(?:de\s+)?|em\s+)([^.!?\n]{2,80})/i)
         || fact.match(/\b(?:j[aá]\s+)?(?:mexi|mexeu|trabalhei|trabalhava|atuei|atuava)\s+com\s+([^.!?\n]{2,80})/i)
+        || fact.match(/\b(?:tenho|possuo|tem)\s+experi[eê]ncia\s+(?:nas?\s+[aá]reas?\s+|em\s+)([^,.;!?\n]{2,80})/i)
         || fact.match(/\b(?:tenho|possuo|tem)\s+experi[eê]ncia\s+(?:como\s+|em\s+|de\s+)([^.!?\n]{2,80})/i)
         || fact.match(/\bexperi[eê]ncia\s+(?:como\s+|em\s+|de\s+)([^.!?\n]{2,80})/i);
       const candidate = cleanChip(match?.[1] || "");
@@ -1453,7 +1457,7 @@
       if (/\bconheci\s+(?:agora|recentemente)\s+(?:o\s+)?(?:seu\s+)?trabalho\b/i.test(body)) {
         add("relacionamento", "Conheceu o trabalho do Felipe recentemente", ["conheceu recentemente"]);
       }
-      if (/\b(?:conhe[cç]o|j[aá] vi|j[aá] pesquisei|j[aá] tentei|j[aá] trabalhei)\b/i.test(body) && /\b(?:mercado|plataforma|trabalho remoto|empresa de tecnologia|home office|projeto)\b/i.test(body + " " + previousAgentBody)) {
+      if (/\b(?:conhe[cç]o|j[aá] vi|j[aá] pesquisei|j[aá] tentei|j[aá] trabalhei)\b/i.test(body) && /\b(?:mercado|plataforma|empresa de tecnologia|projeto)\b/i.test(body + " " + previousAgentBody)) {
         add("mercado", humanizeEvidenceFact(body), [body]);
       }
       if (/^(?:n[aã]o|ainda n[aã]o|nunca)[!,.\s]*$/i.test(body) && /\b(?:conhece|ouviu falar|sabe).{0,70}(?:mercado|trabalho remoto|empresas de tecnologia)\b/i.test(previousAgentBody)) {
@@ -1512,6 +1516,15 @@
         add("trabalho", unemployedNow || /desempregad/i.test(body)
           ? `Possui experiência profissional em ${work}`
           : `Atua profissionalmente em ${work}`, [work]);
+      }
+
+      // "Tenho experiência nas áreas administrativa e judicial" é uma
+      // trajetória objetiva. Ela precisa virar a principal tag e não ser
+      // reduzida à modalidade em que a pessoa já trabalhou.
+      const careerAreas = body.match(/\b(?:tenho|possuo)\s+experi[eê]ncia\s+(?:nas?\s+[aá]reas?\s+|em\s+)([^,.;!?\n]{3,120})/i);
+      if (careerAreas) {
+        const areas = normalize(careerAreas[1]);
+        add("trabalho", `Possui experiência nas áreas ${areas}`, [areas]);
       }
 
       if (/\bclt\b/i.test(previousAgentBody) && /\bsim\b/i.test(body) && /\bhor[aá]rio comercial\b/i.test(body + " " + previousAgentBody)) {
@@ -1638,6 +1651,9 @@
       }
 
       if (/\bj[aá]\s+(?:atuei|trabalhei|tive experi[eê]ncia).{0,45}\bhome(?: office)?\b/i.test(body)) {
+        // Mantém a evidência de experiência remota, mas elimina a paráfrase
+        // redundante da IA que a classificava como "mercado".
+        enriched.topicos = enriched.topicos.filter(item => item?.deterministic || !(/\b(?:j[aá]\s+)?trabalhei\b.{0,45}\bhome(?: office)?\b/i.test(normalize(item?.texto))));
         add("trabalho", "Já atuou por um tempo em home office e considera a modalidade ótima", ["atuou por um tempo", "modalidade ótima"]);
       }
 
