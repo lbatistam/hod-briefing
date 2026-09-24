@@ -1121,8 +1121,8 @@
           const chip = normalize(value);
           if (chip && chip.length <= 60 && !isLowValueLeadChatter(chip) && !chips.includes(chip)) chips.push(chip);
         }
+        if (chips.length) return chips;
       }
-      return chips;
     }
     // A faixa do Instagram precisa ser útil de relance, mas não pode repetir o
     // erro antigo de transformar uma saudação ou uma intenção em "profissão".
@@ -1136,6 +1136,7 @@
     const cleanChip = value => normalize(value)
       .replace(/^(?:eu\s+)?(?:sou|trabalho|atuo)\s+(?:como\s+|na\s+[aá]rea\s+(?:de\s+)?|no\s+setor\s+(?:de\s+)?|em\s+)?/i, "")
       .replace(/\b(?:hoje|atualmente)\b/gi, "")
+      .replace(/\s+(?:em\s+regime\b|há\s+\w+|desde\s+os?\s+\d+|e\s+(?:tenho|tem|possui|possuo|deseja|busca|quer|est[aá]|conta)\b).*$/i, "")
       .replace(/\s+(?:mas|por[eé]m|porque|quando)\s+.*$/i, "")
       .replace(/[.!;,\s]+$/, "").trim();
     const sensible = value => value && value.length >= 3 && value.length <= 44
@@ -1144,7 +1145,7 @@
     let role = "";
     for (const fact of leadFacts) {
       const match = fact.match(/\b(?:eu\s+)?(?:sou|era|fui)\s+(?:um(?:a)?\s+)?([^.!?\n]{2,70})/i)
-        || fact.match(/\b(?:trabalho|atuo|trabalhava|atuava)\s+(?:como\s+|na\s+[aá]rea\s+(?:de\s+)?|no\s+setor\s+(?:de\s+)?|em\s+)([^.!?\n]{2,80})/i);
+        || fact.match(/\b(?:trabalho|atuo|atua|trabalhava|atuava)\s+(?:como\s+|na\s+[aá]rea\s+(?:de\s+)?|no\s+setor\s+(?:de\s+)?|em\s+)([^.!?\n]{2,80})/i);
       const candidate = cleanChip(match?.[1] || "");
       if (sensible(candidate)) { role = candidate; break; }
     }

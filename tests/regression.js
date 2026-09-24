@@ -387,6 +387,12 @@ assert(/Trabalhou na Fiat antes de se aposentar/i.test(mirianBriefing));
 assert(/Busca aumentar a renda/i.test(mirianBriefing));
 assert(/Conheceu o Felipe recentemente/i.test(mirianBriefing));
 
+const ismaelBriefing = content.formatAiBriefing({ nome: "Ismael Júnior", resumo: "Atua como representante comercial autônomo e busca uma segunda renda.", perfil: { ocupacao: "", situacao: "", evidencia: "" }, topicos: [] }, "Ismael Júnior", {}, "instagram", "RESPOSTA DO LEAD: Ismael atua como representante comercial autônomo e tem experiência desde os 18 anos em rotinas administrativas, secretaria, RH e contas a pagar e receber.");
+assert(/`Representante comercial autônomo`/i.test(ismaelBriefing), "Perfil vazio da IA deve cair no extrator de profissão da conversa");
+
+const matheusBriefing = content.formatAiBriefing({ nome: "Matheus Ferreira da Silva", resumo: "Atua como consultor empresarial em home office e busca uma segunda fonte de renda.", perfil: { ocupacao: "", situacao: "", evidencia: "" }, topicos: [] }, "Matheus Ferreira da Silva", {}, "instagram", "RESPOSTA DO LEAD: Matheus atua como consultor empresarial em regime de home office há vários anos e deseja criar uma segunda fonte de renda sem abandonar seu trabalho atual.");
+assert(/`Consultor empresarial`/i.test(matheusBriefing), "A tag deve manter apenas a profissão, sem transformar a frase inteira em chip");
+
 console.log("HOD Briefing V4.1.1 relevance and clipboard tests: OK");
 
 const tathianaConversation = [

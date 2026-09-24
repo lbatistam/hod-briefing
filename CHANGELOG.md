@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.2.3 · tags de profissão recuperáveis
+
+- Corrigido o fallback de tags do Instagram: quando a evidência retornada pela IA vier vazia ou não for literal, a extensão volta a extrair uma profissão objetiva da fala real do lead.
+- Cobertos representantes comerciais autônomos e consultores empresariais em home office, sem colocar a frase inteira dentro da tag.
+
 ## 2.2.2 · origem fora das tags
 
 - O popup também deixa de exibir a origem da conversa como chip. A faixa abaixo do nome contém somente as tags úteis do briefing.
