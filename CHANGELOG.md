@@ -1,6 +1,16 @@
 # Changelog
 
-> HOD Briefing é um único produto ativo. Os números abaixo são identificadores técnicos de builds já publicados; não representam extensões, instalações ou linhas de desenvolvimento paralelas.
+## 2.2.8 · briefing mais completo e leitura profissional geral
+
+- O contrato da IA agora exige leitura de todos os fatos relevantes da conversa e preservação de detalhes no resumo quando ultrapassarem o limite visual de tópicos.
+- O briefing aceita até cinco tópicos úteis; a compactação deixa de remover falas profissionais apenas por conterem “horário”, “amanhã” ou “reunião”.
+- Tags e tópicos passam por um extrator único para autodeclaração, função atual, função anterior, área, setor e experiência. Objetivo, modalidade e disponibilidade continuam fora das tags.
+
+## 2.2.7 · autodeclaração profissional em tags
+
+- A extensão passa a separar profissão de intenção na mesma frase: “sou corretora de imóveis e estou buscando atuar como closer” gera somente `Corretora de imóveis`.
+- A extração cobre `sou`, `era`, `fui`, `atua profissionalmente` e trajetória por áreas, com término seguro antes de objetivos, disponibilidade ou contexto adicional.
+- Novo teste de regressão para Maira Gardini impede que `closer` ou a frase inteira vaze para a tag.
 
 ## 2.2.6 · trajetória por área e home office sem repetição
 

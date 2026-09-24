@@ -1111,6 +1111,34 @@
     return normalize(value).replace(/\p{L}/u, letter => letter.toLocaleUpperCase("pt-BR"));
   }
 
+  // Uma única porta de entrada para profissão, área e trajetória. A conversa
+  // brasileira é naturalmente variada; "sou", "trabalho", "atuo", "já
+  // trabalhei" e "tenho experiência" precisam chegar ao mesmo resultado.
+  function professionalTagFromFact(value) {
+    const fact = normalize(value);
+    const patterns = [
+      /\b(?:eu\s+)?(?:sou|era|fui)\s+(?:um(?:a)?\s+)?([^.!?\n]{2,120})/i,
+      /\b(?:trabalho|trabalha|atuo|atua|trabalhei|trabalhava|atuei|atuava)\s+(?:[^.!?\n]{0,70}?\s+)?como\s+([^.!?\n]{2,120})/i,
+      /\b(?:trabalho|trabalha|atuo|atua|trabalhei|trabalhava|atuei|atuava)(?:\s+profissionalmente)?\s+(?:como\s+|de\s+|com\s+|numa?\s+|no\s+|na\s+|na\s+[aá]rea\s+(?:de\s+)?|no\s+setor\s+(?:de\s+)?|em\s+)([^.!?\n]{2,120})/i,
+      /\b(?:j[aá]\s+)?(?:mexi|mexeu|trabalhei|trabalhava|atuei|atuava)\s+com\s+([^.!?\n]{2,120})/i,
+      /\b(?:tenho|possuo|tem|possui)\s+experi[eê]ncia\s+(?:nas?\s+[aá]reas?\s+|como\s+|em\s+|de\s+)([^.!?\n]{2,120})/i,
+      /\bexperi[eê]ncia\s+(?:como\s+|em\s+|de\s+)([^.!?\n]{2,120})/i,
+      /\b(?:minha\s+)?(?:[aá]rea|atua[cç][aã]o|experi[eê]ncia)\s+(?:[eé]\s+|[ée]\s+)?(?:na\s+[aá]rea\s+(?:de\s+)?|em\s+)([^.!?\n]{2,120})/i,
+      /\b(?:atua|trabalha)\s+profissionalmente\s+em\s+([^.!?\n]{2,120})/i
+    ];
+    const raw = patterns.map(pattern => fact.match(pattern)?.[1]).find(Boolean);
+    if (!raw) return "";
+    const tag = normalize(raw)
+      .replace(/^(?:um|uma|o|a)\s+/i, "")
+      .replace(/\s*(?:,|;|\be\s+(?:estou|est[aá]|tenho|tem|possuo|possui|desejo|deseja|busco|busca|quero|quer|pretendo|gostaria|posso|preciso|conto|vou)\b|\b(?:mas|por[eé]m|porque|quando)\b).*$/i, "")
+      .replace(/\s+(?:em\s+regime\b|há\s+\w+|desde\s+os?\s+\d+).*$/i, "")
+      .replace(/\s+na\s+constru[cç][aã]o\s+civil\b.*$/i, "")
+      .replace(/[.!;,:\s]+$/, "").trim();
+    if (tag.length < 3 || tag.length > 44 || isLowValueLeadChatter(tag)) return "";
+    if (/^(?:sim|n[aã]o|isso|claro|interessad[oa]|disponibilidade|equipamentos?|desempregad[oa]|aposentad[oa]|home office|trabalho remoto|remot[oa]|renda|liberdade|emprego)$/i.test(tag)) return "";
+    return tag.charAt(0).toLocaleUpperCase("pt-BR") + tag.slice(1);
+  }
+
   function profileChipsFromEvidence(evidenceSource, topics, semanticProfile) {
     if (semanticProfile) {
       const chips = [];
@@ -1136,36 +1164,16 @@
       .map(line => normalize(line.replace(/^[^:]+:\s*/, "")))
       .filter(Boolean);
     const allFacts = leadFacts.join("\n");
-    const cleanChip = value => normalize(value)
-      .replace(/^(?:eu\s+)?(?:sou|trabalho|atuo)\s+(?:como\s+|na\s+[aá]rea\s+(?:de\s+)?|no\s+setor\s+(?:de\s+)?|em\s+)?/i, "")
-      .replace(/^(?:um|uma|o|a)\s+/i, "")
-      .replace(/\b(?:hoje|atualmente)\b/gi, "")
-      .replace(/\s+(?:em\s+regime\b|há\s+\w+|desde\s+os?\s+\d+|e\s+(?:tenho|tem|possui|possuo|deseja|busca|quer|est[aá]|conta)\b).*$/i, "")
-      .replace(/\s+na\s+constru[cç][aã]o\s+civil\b.*$/i, "")
-      .replace(/\s+(?:mas|por[eé]m|porque|quando)\s+.*$/i, "")
-      .replace(/[.!;,\s]+$/, "").trim();
-    const sensible = value => value && value.length >= 3 && value.length <= 44
-      && !isLowValueLeadChatter(value)
-      && !/^(?:sim|n[aã]o|isso|claro|interessad[oa]|disponibilidade|equipamentos?|desempregad[oa]|home office|trabalho remoto)$/i.test(value);
     let role = "";
     for (const fact of leadFacts) {
-      const match = fact.match(/\b(?:eu\s+)?(?:sou|era|fui)\s+(?:um(?:a)?\s+)?([^.!?\n]{2,70})/i)
-        || fact.match(/\b(?:trabalho|trabalha|atuo|atua|trabalhei|trabalhava|atuei|atuava)\s+(?:como\s+|de\s+|numa?\s+|no\s+|na\s+|na\s+[aá]rea\s+(?:de\s+)?|no\s+setor\s+(?:de\s+)?|em\s+)([^.!?\n]{2,80})/i)
-        || fact.match(/\b(?:j[aá]\s+)?(?:mexi|mexeu|trabalhei|trabalhava|atuei|atuava)\s+com\s+([^.!?\n]{2,80})/i)
-        || fact.match(/\b(?:tenho|possuo|tem)\s+experi[eê]ncia\s+(?:nas?\s+[aá]reas?\s+|em\s+)([^,.;!?\n]{2,80})/i)
-        || fact.match(/\b(?:tenho|possuo|tem)\s+experi[eê]ncia\s+(?:como\s+|em\s+|de\s+)([^.!?\n]{2,80})/i)
-        || fact.match(/\bexperi[eê]ncia\s+(?:como\s+|em\s+|de\s+)([^.!?\n]{2,80})/i);
-      const candidate = cleanChip(match?.[1] || "");
-      if (sensible(candidate)) { role = candidate; break; }
+      const candidate = professionalTagFromFact(fact);
+      if (candidate) { role = candidate; break; }
     }
     if (!role) {
       const workTopic = (topics || []).find(item => normalize(item?.tipo).toLocaleLowerCase("pt-BR") === "trabalho"
         && !/\b(?:bom dia|boa tarde|boa noite|tudo bem)\b/i.test(normalize(item?.texto))
         && !/^desempregad[oa]$/i.test(normalize(item?.texto)));
-      const text = normalize(workTopic?.texto);
-      const match = text.match(/\b(?:como|na\s+[aá]rea\s+(?:de\s+)?|no\s+setor\s+(?:de\s+)?|em)\s+([^.;!?]{3,80})/i);
-      const candidate = cleanChip(match?.[1] || "");
-      if (sensible(candidate)) role = candidate;
+      role = professionalTagFromFact(workTopic?.texto);
     }
     let situation = "";
     if (/\bdesempregad[oa]\b/i.test(allFacts)) situation = "Desempregado(a)";
@@ -1501,27 +1509,29 @@
 
       // Regra universal: entende qualquer profissão, cargo, setor ou área pela
       // autodeclaração ou pela resposta à pergunta profissional anterior.
-      const declaredWork = body.match(/\b(?:trabalho|trabalha|atuo|atua|trabalhei|atuei|trabalhava|atuava|sou)\s+(?:(?:atualmente|hoje)\s+)?(?:como\s+|com\s+|em\s+|numa?\s+|no\s+|na\s+|na\s+[aá]rea\s+de\s+|no\s+setor\s+de\s+)([^.;!?\n]{2,180})/i);
+      const declaredWork = body.match(/\b(?:trabalho|trabalha|atuo|atua|trabalhei|atuei|trabalhava|atuava)\s+(?:(?:atualmente|hoje)\s+)?(?:como\s+|com\s+|em\s+|numa?\s+|no\s+|na\s+|na\s+[aá]rea\s+de\s+|no\s+setor\s+de\s+)([^.;!?\n]{2,180})/i)
+        || body.match(/\b(?:eu\s+)?sou\s+(?:um(?:a)?\s+)?([^,.;!?\n]{2,120})/i);
       const workQuestion = /\b(?:com o que|qual (?:[aá]rea|setor|profiss[aã]o|cargo)|em que (?:[aá]rea|setor)).{0,90}(?:atua|trabalha|exerce|est[aá])?\b/i.test(previousAgentBody);
       const formerWork = workQuestion ? body.match(/^\s*(?:eu\s+)?(?:era|fui)\s+(?:um(?:a)?\s+)?([^.;!?\n]{3,120})/i) : null;
       const contextualWork = workQuestion && !/\b(?:bem|contigo|voc[eê]|vc|obrigad[oa]|oi|ol[aá]|tarde|noite|dia)\b/i.test(body)
         ? body.match(/^(?:[aá]rea\s+|setor\s+)?([\p{L}À-ÿ][\p{L}À-ÿ\s/&+-]{2,120})(?:[.!?]|$)/u)
         : null;
-      let rawWork = normalize(declaredWork?.[1] || formerWork?.[1] || contextualWork?.[1]);
+      const careerAreas = body.match(/\b(?:tenho|possuo)\s+experi[eê]ncia\s+(?:nas?\s+[aá]reas?\s+|em\s+)([^,.;!?\n]{3,120})/i);
+      let rawWork = professionalTagFromFact(body) || normalize(declaredWork?.[1] || formerWork?.[1] || contextualWork?.[1]);
       // Uma frase como "sou aposentada, trabalhei na Fiat..." contém vários
       // fatos; não trate o restante da frase como se fosse uma profissão única.
       if (/^aposentad[oa]\b[,:].*\b(?:trabalhei|trabalhava|busco|quero)\b/i.test(rawWork)) rawWork = "";
-      if (rawWork && !isLowValueLeadChatter(rawWork) && !/^(?:sim|n[aã]o|home office|remot[oa]|renda|liberdade|emprego)$/i.test(rawWork)) {
-        const work = rawWork.replace(/\s*[\/]\s*/g, " e ").replace(/\(([^)]+)\)/g, "$1");
+      if (!careerAreas && rawWork && !isLowValueLeadChatter(rawWork) && !/^(?:sim|n[aã]o|home office|remot[oa]|renda|liberdade|emprego|aposentad[oa]|desempregad[oa])$/i.test(rawWork)) {
+        const work = rawWork.replace(/\s*[\/]\s*/g, " e ").replace(/\(([^)]+)\)/g, "$1")
+          .replace(/\s+(?:e\s+)?(?:estou|est[aá]|tenho|possuo|busco|quero|pretendo|desejo|gostaria|preciso|posso|vou)\b.*$/i, "").trim();
         add("trabalho", unemployedNow || /desempregad/i.test(body)
           ? `Possui experiência profissional em ${work}`
-          : `Atua profissionalmente em ${work}`, [work]);
+          : `Atua profissionalmente em ${work.charAt(0).toLocaleLowerCase("pt-BR") + work.slice(1)}`, [work]);
       }
 
       // "Tenho experiência nas áreas administrativa e judicial" é uma
       // trajetória objetiva. Ela precisa virar a principal tag e não ser
       // reduzida à modalidade em que a pessoa já trabalhou.
-      const careerAreas = body.match(/\b(?:tenho|possuo)\s+experi[eê]ncia\s+(?:nas?\s+[aá]reas?\s+|em\s+)([^,.;!?\n]{3,120})/i);
       if (careerAreas) {
         const areas = normalize(careerAreas[1]);
         add("trabalho", `Possui experiência nas áreas ${areas}`, [areas]);
@@ -1698,7 +1708,9 @@
   }
 
   function compactForAi(conversation, channel = "unknown") {
-    const crmNoise = /(?:google meet|consultoria gratuita|convite|whatsapp|e-?mail|telefone|agend(?:ar|amento|ei)|bate[- ]?papo|condi[cç][aã]o especial|hor[aá]rio|amanh[aã]|reuni[aã]o|appointment|opportunity)/i;
+    // Só corta logística inequívoca. Termos isolados como "horário", "amanhã"
+    // ou "reunião" podem fazer parte da rotina e não devem apagar a fala inteira.
+    const crmNoise = /(?:google meet|consultoria gratuita|convite|whatsapp|e-?mail|telefone|appointment|opportunity|link da reuni[aã]o|hor[aá]rio (?:da|para a) reuni[aã]o|agend(?:ar|amento|ei)|bate[- ]?papo|condi[cç][aã]o especial)/i;
     const leadLogistics = /^(?:(?:quero|gostaria|preciso|vim|estou aqui para).*(?:agend|marcar|bate[- ]?papo|consultoria|condi[cç][aã]o especial)|(?:me (?:envie|passa|mande)|envio|segue|aqui est[aá]|pode ser|consigo|sim|n[aã]o)\b.*(?:link|e-?mail|telefone|whatsapp|agend|reuni[aã]o|consultoria|hor[aá]rio)|(?:qual|que) hor[aá]rio\b)/i;
     const genericAnswer = /^(?:sim|quero sim|n[aã]o|tenho sim|consigo sim|pode ser|perfeito|show+|legal|interessante|bora|entendi|realmente|faz total sentido|beleza|ok)[!,.\s]*$/i;
     // "Hoje" aparece com frequência em perguntas profissionais ("hoje você

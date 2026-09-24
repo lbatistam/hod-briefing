@@ -16,7 +16,7 @@ const schema = {
     perfil: { type: "object", additionalProperties: false, required: ["ocupacao", "situacao", "evidencia"],
       properties: { ocupacao: { type: "string" }, situacao: { type: "string" }, evidencia: { type: "string" } } },
     resumo: { type: "string", maxLength: 420 },
-    topicos: { type: "array", minItems: 0, maxItems: 4, items: {
+    topicos: { type: "array", minItems: 0, maxItems: 5, items: {
       type: "object", additionalProperties: false, required: ["tipo", "texto", "evidencia"],
       properties: {
         tipo: { type: "string", enum: [...ALLOWED_TOPIC_TYPES] },
@@ -41,7 +41,7 @@ function normalizeBriefingData(value) {
     if (!texto) return [];
     const requestedType = String(item.tipo || item.type || "contexto").trim().toLocaleLowerCase("pt-BR");
     return [{ tipo: ALLOWED_TOPIC_TYPES.has(requestedType) ? requestedType : "contexto", texto, evidencia: String(item.evidencia || item.evidência || item.evidence || "").trim() }];
-  }).slice(0, 4);
+  }).slice(0, 5);
   const p = value.perfil || {};
   const perfil = { ocupacao: String(p.ocupacao || "").slice(0, 60), situacao: String(p.situacao || "").slice(0, 50), evidencia: String(p.evidencia || "").slice(0, 500) };
   return { nome: String(value.nome || value.name || "").trim(), resumo: String(value.resumo || value.summary || "").trim(), perfil, topicos };
@@ -86,7 +86,7 @@ function parseModelBriefing(content) {
   const summaryMatch = raw.match(/"(?:resumo|summary)"\s*:\s*("(?:\\.|[^"\\])*")/i);
   let resumo = "";
   if (summaryMatch) try { resumo = JSON.parse(summaryMatch[1]); } catch (_) {}
-  return { data: { nome, resumo, topicos: topicos.slice(0, 3) }, recovered: true };
+  return { data: { nome, resumo, topicos: topicos.slice(0, 5) }, recovered: true };
 }
 
 function modelOutputQuality(data, source) {
@@ -236,7 +236,7 @@ async function aiOptions() {
   o.reasoning = ["low", "medium", "high"].includes(o.reasoning) ? o.reasoning : "medium";
   o.timeoutSeconds = Math.min(90, Math.max(10, Number(o.timeoutSeconds) || 35));
   o.retries = Math.min(2, Math.max(0, Number(o.retries) || 0));
-  o.topicCount = Math.min(4, Math.max(2, Number(o.topicCount) || 4));
+  o.topicCount = Math.min(5, Math.max(2, Number(o.topicCount) || 5));
   return o;
 }
 
@@ -252,7 +252,7 @@ async function callAi(conversation, ownsLock = false) {
     return response.text();
   }).catch(error => { systemPromptPromise = undefined; throw error; });
   const options = await aiOptions();
-  const system = (await systemPromptPromise) + "\nLimite de tópicos: " + options.topicCount + ". Use menos se faltarem fatos; em conversa rica, preserve trajetória, tentativas e objetivo. JSON obrigatório.";
+  const system = (await systemPromptPromise) + "\nLimite de tópicos: " + options.topicCount + ". Em conversa rica, use todos os tópicos necessários dentro do limite e preserve trajetória, tentativas, contexto e objetivo. Não descarte um fato relevante apenas por ele não caber como tópico: inclua-o no resumo. JSON obrigatório.";
   const limited = limitSource(conversation);
   let answer;
   const started = performance.now();

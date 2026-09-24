@@ -12,6 +12,8 @@ Use apenas:
 
 Fala do SDR serve apenas para entender o contexto de uma resposta. Não a transforme em fato. Não invente, complete lacunas nem deduza renda, idade, disponibilidade, interesse, investimento ou experiência.
 
+Antes de escrever, percorra todas as respostas do lead e identifique cada fato que muda a leitura do perfil: profissão, área, função, trajetória atual ou anterior, rotina, experiência remota, contexto familiar, dor, tentativa, objetivo, dúvida, objeção, estrutura e momento profissional. Não descarte um fato confirmado apenas porque está em uma frase longa ou junto de outro assunto.
+
 ## Saída JSON
 
 Retorne somente JSON com `nome`, `perfil`, `resumo` e `topicos`.
@@ -24,9 +26,11 @@ Retorne somente JSON com `nome`, `perfil`, `resumo` e `topicos`.
 
 O formato final — nome, tags, emojis e HTML — é responsabilidade do motor da extensão. Nunca escreva Markdown, HTML, tags, título, emoji ou bullet dentro do JSON.
 
+Quando houver uma profissão, área ou trajetória declarada, extraia a parte profissional curta para `perfil.ocupacao`, mesmo que a mesma frase também tenha um objetivo. Exemplos: “sou corretora de imóveis e quero ser closer” → `Corretora de imóveis`; “tenho experiência nas áreas administrativa e judicial” → `Administrativa e judicial`.
+
 ## Resumo
 
-Escreva de 1 a 3 frases naturais. Conte somente a história que ajuda o closer a conduzir a conversa:
+Escreva de 1 a 3 frases naturais. Conte toda a história relevante que ajuda o closer a conduzir a conversa; quando existirem mais fatos do que o limite de tópicos comporta, preserve-os no resumo:
 
 - o trabalho ou a trajetória relevante
 - o momento atual ou a dor concreta
@@ -37,9 +41,9 @@ Não repita no resumo o que já estiver evidente nas tags. Não use “o lead”
 
 ## Tópicos
 
-Escolha entre 1 e o limite configurado de tópicos. Cada tópico deve acrescentar uma informação que o resumo não contou. Uma ideia por tópico, sem ponto final e sem reformular a mesma frase com outras palavras.
+Escolha entre 1 e o limite configurado de tópicos. Cada tópico deve acrescentar uma informação relevante; pode aprofundar ou deixar mais escaneável algo citado no resumo, mas não pode ser mera repetição. Uma ideia por tópico, sem ponto final e sem reformular a mesma frase com outras palavras.
 
-Prioridade: experiência concreta, dor ou obstáculo, objetivo específico, tentativa anterior, estrutura relevante, família/contexto e dúvida ou objeção real. Não preencha quantidade com informação fraca.
+Prioridade: experiência concreta, profissão/área e trajetória anterior, dor ou obstáculo, objetivo específico, tentativa anterior, estrutura relevante, família/contexto e dúvida ou objeção real. Não preencha quantidade com informação fraca, mas também não comprima uma conversa rica em um resumo genérico.
 
 Os tipos permitidos são: `trabalho`, `formacao`, `localidade`, `familia`, `objetivo`, `transicao`, `conhecimento`, `estrutura`, `financeiro`, `dificuldade`, `saude`, `relacionamento`, `mercado`, `comercial`, `positivo` e `contexto`.
 

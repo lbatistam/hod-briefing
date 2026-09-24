@@ -19,7 +19,7 @@ function contentFunctions() {
   const source = fs.readFileSync("content.js", "utf8");
   const marker = source.indexOf("  function enableModalWindow");
   assert(marker > 0, "Não foi possível isolar as funções puras do content script");
-  const testable = `${source.slice(0, marker)}\n  globalThis.hodContentTest = { aiInput, enrichConversationBriefing, formatAiBriefing, isMeetingAvailabilityText, briefingClipboardFormats, directionFor, validFieldValue };\n})();`;
+  const testable = `${source.slice(0, marker)}\n  globalThis.hodContentTest = { aiInput, enrichConversationBriefing, formatAiBriefing, isMeetingAvailabilityText, briefingClipboardFormats, directionFor, validFieldValue, professionalTagFromFact };\n})();`;
   const context = { console, setTimeout, clearTimeout };
   vm.createContext(context);
   vm.runInContext(fs.readFileSync("settings.js", "utf8"), context);
@@ -412,6 +412,17 @@ const rafaelLessaBriefing = content.formatAiBriefing(rafaelLessaData, "Rafael Le
 assert(/`Administrativa e judicial`/i.test(rafaelLessaBriefing), "Experiência por áreas deve gerar a tag principal de Rafael Lessa");
 assert(/💼 Possui experiência nas áreas administrativa e judicial/i.test(rafaelLessaBriefing), "A trajetória profissional deve aparecer como tópico de trabalho");
 assert(!/🌐 Já trabalhei home office/i.test(rafaelLessaBriefing), "Experiência em home office não pode ser classificada como mercado");
+
+const mairaConversation = [
+  "CONTATO: Maira Gardini",
+  "FELIPE:\nHoje você trabalha com o quê?",
+  "MAIRA:\nSou corretora de imóveis e estou buscando atuar como closer. Estou começando do zero no home office."
+].join("\n\n");
+const mairaData = content.enrichConversationBriefing({ nome: "Maira Gardini", resumo: "Maira, corretora de imóveis, está iniciando sua transição para o home office como closer e busca orientação para começar do zero.", perfil: { ocupacao: "", situacao: "", evidencia: "" }, topicos: [] }, mairaConversation);
+const mairaBriefing = content.formatAiBriefing(mairaData, "Maira Gardini", {}, "instagram", content.aiInput(mairaConversation, "instagram", {}));
+assert(/`Corretora de imóveis`/i.test(mairaBriefing), "Autodeclaração com 'sou' deve gerar tag sem incluir o objetivo posterior");
+assert(!/`[^`]*closer[^`]*`/i.test(mairaBriefing), "Objetivo de atuar como closer não pode vazar para a tag profissional");
+assert.strictEqual(content.professionalTagFromFact("Trabalho numa clínica como auxiliar administrativo e quero mudar de área"), "Auxiliar administrativo", "A função precisa prevalecer sobre o local de trabalho");
 
 const rafaelConversation = [
   "CONTATO: Rafael Oliveira",
