@@ -400,6 +400,25 @@ assert(/<strong><code>Despachante e empreiteiro<\/code><\/strong>/i.test(maurici
 const mauricioPastRole = content.formatAiBriefing({ nome: "Maurício Maldonado Filho", resumo: "Está desempregado e busca uma oportunidade em home office.", perfil: { ocupacao: "", situacao: "", evidencia: "" }, topicos: [] }, "Maurício Maldonado Filho", {}, "instagram", "RESPOSTA DO LEAD: Já mexi com despachante e empreiteiro na construção civil e hoje estou desempregado.");
 assert(/`Despachante e empreiteiro`/i.test(mauricioPastRole), "Função antiga declarada pelo lead também deve gerar uma tag principal");
 
+const rafaelConversation = [
+  "CONTATO: Rafael Oliveira",
+  "FELIPE:\nHoje você trabalha com o que?",
+  "RAFAEL:\nTrabalho em um lava-car",
+  "FELIPE:\nO que você busca no home office?",
+  "RAFAEL:\nQuero migrar para o home office porque o deslocamento tem limitado minhas oportunidades",
+  "FELIPE:\nVocê já trabalhou remotamente?",
+  "RAFAEL:\nEstou começando do zero, sem experiência em trabalho remoto"
+].join("\n\n");
+for (const channel of ["instagram", "whatsapp"]) {
+  const rafaelSource = content.aiInput(rafaelConversation, channel, {});
+  const rafaelData = content.enrichConversationBriefing({ nome: "Rafael Oliveira", resumo: "Rafael trabalha em um lava-car e quer migrar para o home office, pois o deslocamento tem limitado suas oportunidades. Ele está começando do zero, sem experiência prévia em trabalho remoto.", perfil: { ocupacao: "", situacao: "", evidencia: "" }, topicos: [] }, rafaelConversation);
+  const rafaelBriefing = content.formatAiBriefing(rafaelData, "Rafael Oliveira", {}, channel, rafaelSource);
+  assert(/`Lava-car`/i.test(rafaelBriefing), `Rafael deve receber tag profissional no canal ${channel}`);
+  assert((rafaelBriefing.match(/^(?:💼|🎯|🧠|🔄|🧭)/gmu) || []).length >= 3, `Rafael deve receber profissão, objetivo e conhecimento com emojis no canal ${channel}`);
+  const rafaelClipboard = content.briefingClipboardFormats(rafaelBriefing);
+  assert(/<strong><code>Lava-car<\/code><\/strong>/i.test(rafaelClipboard.html), `Tag de Rafael deve ser HTML no canal ${channel}`);
+}
+
 console.log("HOD Briefing V4.1.1 relevance and clipboard tests: OK");
 
 const tathianaConversation = [

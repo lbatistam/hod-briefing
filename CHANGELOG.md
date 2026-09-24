@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.2.5 · tags e tópicos em todos os canais
+
+- A extração de profissão passa a funcionar igualmente em Instagram e WhatsApp, inclusive quando a IA não devolve `perfil` válido.
+- O fluxo de produção volta a enriquecer o resultado com fatos determinísticos da conversa antes da apresentação, evitando resumos sem tópicos e emojis.
+- Conhecimento explícito, como “começando do zero”, mantém categoria própria e não é descartado como repetição da profissão.
+- Adicionada regressão completa de Rafael: `Lava-car` em HTML e pelo menos três tópicos úteis com emojis nos dois canais.
+
 ## 2.2.4 · profissão dupla em tag HTML
 
 - Tags passam a reconhecer construções como “experiência como”, “trabalhei de” e “atuou como”.

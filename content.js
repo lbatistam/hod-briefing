@@ -978,7 +978,7 @@
   function topicTypeFor(suggested, text) {
     const clean = normalize(text).toLocaleLowerCase("pt-BR");
     if (/^(?:est[aá]\s+)?desempregad[oa](?:\s+no momento)?$/.test(clean)) return "transicao";
-    if (["transicao", "formacao", "objetivo"].includes(suggested)) return suggested;
+    if (["transicao", "formacao", "objetivo", "conhecimento"].includes(suggested)) return suggested;
     if (suggested === "trabalho" && /\b(?:atua|trabalha|trabalhou|professor[ae]?|profiss[aã]o|carreira|emprego|aut[oô]nom[oa]|empreendedor)\b/i.test(clean)) return "trabalho";
     const painType = painTopicType(clean);
     if (painType) return painType;
@@ -1111,7 +1111,7 @@
     return normalize(value).replace(/\p{L}/u, letter => letter.toLocaleUpperCase("pt-BR"));
   }
 
-  function instagramProfileChips(evidenceSource, topics, semanticProfile) {
+  function profileChipsFromEvidence(evidenceSource, topics, semanticProfile) {
     if (semanticProfile) {
       const chips = [];
       const literal = String(evidenceSource || "").split("\n").filter(line => /^(?:RESPOSTA DO LEAD|CRM \(FATO)/.test(line)).join(" ");
@@ -1135,6 +1135,7 @@
     const allFacts = leadFacts.join("\n");
     const cleanChip = value => normalize(value)
       .replace(/^(?:eu\s+)?(?:sou|trabalho|atuo)\s+(?:como\s+|na\s+[aá]rea\s+(?:de\s+)?|no\s+setor\s+(?:de\s+)?|em\s+)?/i, "")
+      .replace(/^(?:um|uma|o|a)\s+/i, "")
       .replace(/\b(?:hoje|atualmente)\b/gi, "")
       .replace(/\s+(?:em\s+regime\b|há\s+\w+|desde\s+os?\s+\d+|e\s+(?:tenho|tem|possui|possuo|deseja|busca|quer|est[aá]|conta)\b).*$/i, "")
       .replace(/\s+na\s+constru[cç][aã]o\s+civil\b.*$/i, "")
@@ -1146,7 +1147,7 @@
     let role = "";
     for (const fact of leadFacts) {
       const match = fact.match(/\b(?:eu\s+)?(?:sou|era|fui)\s+(?:um(?:a)?\s+)?([^.!?\n]{2,70})/i)
-        || fact.match(/\b(?:trabalho|atuo|atua|trabalhei|trabalhava|atuei|atuava)\s+(?:como\s+|de\s+|na\s+[aá]rea\s+(?:de\s+)?|no\s+setor\s+(?:de\s+)?|em\s+)([^.!?\n]{2,80})/i)
+        || fact.match(/\b(?:trabalho|trabalha|atuo|atua|trabalhei|trabalhava|atuei|atuava)\s+(?:como\s+|de\s+|numa?\s+|no\s+|na\s+|na\s+[aá]rea\s+(?:de\s+)?|no\s+setor\s+(?:de\s+)?|em\s+)([^.!?\n]{2,80})/i)
         || fact.match(/\b(?:j[aá]\s+)?(?:mexi|mexeu|trabalhei|trabalhava|atuei|atuava)\s+com\s+([^.!?\n]{2,80})/i)
         || fact.match(/\b(?:tenho|possuo|tem)\s+experi[eê]ncia\s+(?:como\s+|em\s+|de\s+)([^.!?\n]{2,80})/i)
         || fact.match(/\bexperi[eê]ncia\s+(?:como\s+|em\s+|de\s+)([^.!?\n]{2,80})/i);
@@ -1212,12 +1213,11 @@
     const profile = [];
     const instagramWithoutScore = channel === "instagram";
     const whatsappWithProfile = channel === "whatsapp";
+    let whatsappSituation = "";
     if (whatsappWithProfile) {
       if (score) profile.push(`Score ${score}`);
-      const occupation = normalize(data?.perfil?.ocupacao);
-      if (occupation && occupation.length <= 60) profile.push(titleProfileLabel(occupation));
       const situation = validFieldValue(contactData["Situação"], "Situação");
-      if (situation && !profile.some(item => normalize(item).toLocaleLowerCase("pt-BR") === normalize(situation).toLocaleLowerCase("pt-BR"))) profile.push(situation.charAt(0).toLocaleUpperCase("pt-BR") + situation.slice(1));
+      if (situation) whatsappSituation = situation.charAt(0).toLocaleUpperCase("pt-BR") + situation.slice(1);
     } else if (!instagramWithoutScore) {
       if (score) profile.push(`Score ${score}`);
       const age = validFieldValue(contactData.Idade, "Idade");
@@ -1339,7 +1339,12 @@
       selectedTopics.push(topic);
       if (compactPresentation && selectedTopics.length === Number(currentSettings.topicCount || 3)) break;
     }
-    if (instagramWithoutScore) profile.push(...instagramProfileChips(evidenceSource, aiTopics, data?.perfil));
+    if (instagramWithoutScore || whatsappWithProfile) {
+      for (const chip of profileChipsFromEvidence(evidenceSource, aiTopics, data?.perfil)) {
+        if (!profile.some(item => normalize(item).toLocaleLowerCase("pt-BR") === normalize(chip).toLocaleLowerCase("pt-BR"))) profile.push(chip);
+      }
+    }
+    if (whatsappSituation && !profile.some(item => normalize(item).toLocaleLowerCase("pt-BR") === normalize(whatsappSituation).toLocaleLowerCase("pt-BR"))) profile.push(whatsappSituation);
     for (const topic of selectedTopics) {
       const normalizedTopic = normalize(topic.texto).toLocaleLowerCase("pt-BR");
       if (profile.some(chip => normalizedTopic === normalize(chip).toLocaleLowerCase("pt-BR"))) continue;
@@ -1492,7 +1497,7 @@
 
       // Regra universal: entende qualquer profissão, cargo, setor ou área pela
       // autodeclaração ou pela resposta à pergunta profissional anterior.
-      const declaredWork = body.match(/\b(?:trabalho|atuo|trabalhava|atuava|sou)\s+(?:(?:atualmente|hoje)\s+)?(?:como\s+|com\s+|em\s+|na\s+[aá]rea\s+de\s+|no\s+setor\s+de\s+)([^.;!?\n]{2,180})/i);
+      const declaredWork = body.match(/\b(?:trabalho|trabalha|atuo|atua|trabalhei|atuei|trabalhava|atuava|sou)\s+(?:(?:atualmente|hoje)\s+)?(?:como\s+|com\s+|em\s+|numa?\s+|no\s+|na\s+|na\s+[aá]rea\s+de\s+|no\s+setor\s+de\s+)([^.;!?\n]{2,180})/i);
       const workQuestion = /\b(?:com o que|qual (?:[aá]rea|setor|profiss[aã]o|cargo)|em que (?:[aá]rea|setor)).{0,90}(?:atua|trabalha|exerce|est[aá])?\b/i.test(previousAgentBody);
       const formerWork = workQuestion ? body.match(/^\s*(?:eu\s+)?(?:era|fui)\s+(?:um(?:a)?\s+)?([^.;!?\n]{3,120})/i) : null;
       const contextualWork = workQuestion && !/\b(?:bem|contigo|voc[eê]|vc|obrigad[oa]|oi|ol[aá]|tarde|noite|dia)\b/i.test(body)
@@ -1516,6 +1521,16 @@
       if (/\bgostaria\s+de\s+atuar\s+(?:hoje|home)\s*office\b/i.test(body)) {
         const expand = /\bampliar\s+(?:minhas|suas)\s+entregas\b/i.test(body);
         add("objetivo", `Busca atuar em home office${expand ? " e ampliar suas entregas" : ""}`, ["home office", "ampliar entregas"]);
+      }
+
+      if (/\b(?:quero|busco|pretendo|desejo)\b.{0,55}\b(?:migrar|entrar|come[cç]ar|iniciar)\b.{0,55}\b(?:home\s*office|trabalho remoto)\b/i.test(body)) {
+        const limitedByCommute = /\bdeslocamento\b.{0,60}\b(?:limita|limitado|dificulta|impede)\b/i.test(body);
+        add("objetivo", limitedByCommute
+          ? "Busca migrar para o home office porque o deslocamento limita suas oportunidades"
+          : "Busca migrar para o home office", ["migrar", "home office"]);
+      }
+      if (/\b(?:come[cç](?:ando|ar)|partir)\s+do\s+zero\b|\bsem\s+experi[eê]ncia\b.{0,40}\b(?:home\s*office|trabalho remoto|remot[oa])\b/i.test(body)) {
+        add("conhecimento", "Está começando do zero, sem experiência prévia em trabalho remoto", ["começando do zero", "sem experiência"]);
       }
 
       const elapsedOutsideArea = body.match(/\b(?:j[aá]\s+)?(?:tem|faz|h[aá])\s+(um(?:a)?|dois|duas|tr[eê]s|quatro|cinco|seis|sete|oito|nove|dez|\d+)\s+(dias?|semanas?|m[eê]s|meses|anos?)\b/i);
@@ -2088,7 +2103,7 @@
         new Promise((_, reject) => setTimeout(() => reject(new Error("A IA excedeu o tempo total configurado.")), 280000))
       ]);
       if (!result?.ok) throw new Error(result?.error || "Não foi possível gerar o briefing.");
-      const briefingData = result.data;
+      const briefingData = enrichConversationBriefing(result.data, text);
       result.captureMs = captureInfo.durationMs;
       result.channel = channel;
       showV2Result(formatAiBriefing(briefingData, contactName(scroller), contactData, channel, source), text, contactData, result);
