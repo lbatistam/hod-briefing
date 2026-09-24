@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.2.4 · profissão dupla em tag HTML
+
+- Tags passam a reconhecer construções como “experiência como”, “trabalhei de” e “atuou como”.
+- Maurício recebe `Despachante e empreiteiro`, convertido na cópia para HTML semântico compatível com GHL.
+- Funções atuais e antigas declaradas pelo lead passam pela mesma extração de tag; “já mexi com” e “experiência de” também são reconhecidos.
+
 ## 2.2.3 · tags de profissão recuperáveis
 
 - Corrigido o fallback de tags do Instagram: quando a evidência retornada pela IA vier vazia ou não for literal, a extensão volta a extrair uma profissão objetiva da fala real do lead.

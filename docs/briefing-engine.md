@@ -29,6 +29,7 @@ Tags são geradas em uma única linha e copiadas como HTML semântico `<strong><
 ## Repetição e emojis
 
 - O resumo conta a história; tags classificam; tópicos acrescentam fatos novos.
+- Cargo, função ou área declarada pelo lead — atual ou anterior — pode virar tag curta quando ajudar o closer a reconhecer sua trajetória.
 - Cada tópico recebe no máximo um emoji, escolhido pelo tipo do fato.
 - Não repetir profissão, objetivo ou frase do resumo nos tópicos.
 - Não usar emoji no Perfil do Lead nem para preencher espaço.

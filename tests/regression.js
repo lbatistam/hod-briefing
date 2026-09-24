@@ -393,6 +393,13 @@ assert(/`Representante comercial autônomo`/i.test(ismaelBriefing), "Perfil vazi
 const matheusBriefing = content.formatAiBriefing({ nome: "Matheus Ferreira da Silva", resumo: "Atua como consultor empresarial em home office e busca uma segunda fonte de renda.", perfil: { ocupacao: "", situacao: "", evidencia: "" }, topicos: [] }, "Matheus Ferreira da Silva", {}, "instagram", "RESPOSTA DO LEAD: Matheus atua como consultor empresarial em regime de home office há vários anos e deseja criar uma segunda fonte de renda sem abandonar seu trabalho atual.");
 assert(/`Consultor empresarial`/i.test(matheusBriefing), "A tag deve manter apenas a profissão, sem transformar a frase inteira em chip");
 
+const mauricioBriefing = content.formatAiBriefing({ nome: "Maurício Maldonado Filho", resumo: "Tem experiência como despachante e empreiteiro na construção civil, mas está desempregado e busca iniciar um negócio de home office.", perfil: { ocupacao: "", situacao: "", evidencia: "" }, topicos: [] }, "Maurício Maldonado Filho", {}, "instagram", "RESPOSTA DO LEAD: Tenho experiência como despachante e empreiteiro na construção civil, mas estou desempregado e busco iniciar um negócio de home office.");
+assert(/`Despachante e empreiteiro`/i.test(mauricioBriefing), "Experiência como profissão dupla deve criar a tag de Maurício");
+const mauricioClipboard = content.briefingClipboardFormats(mauricioBriefing);
+assert(/<strong><code>Despachante e empreiteiro<\/code><\/strong>/i.test(mauricioClipboard.html), "A tag de Maurício deve sair como HTML semântico compatível com GHL");
+const mauricioPastRole = content.formatAiBriefing({ nome: "Maurício Maldonado Filho", resumo: "Está desempregado e busca uma oportunidade em home office.", perfil: { ocupacao: "", situacao: "", evidencia: "" }, topicos: [] }, "Maurício Maldonado Filho", {}, "instagram", "RESPOSTA DO LEAD: Já mexi com despachante e empreiteiro na construção civil e hoje estou desempregado.");
+assert(/`Despachante e empreiteiro`/i.test(mauricioPastRole), "Função antiga declarada pelo lead também deve gerar uma tag principal");
+
 console.log("HOD Briefing V4.1.1 relevance and clipboard tests: OK");
 
 const tathianaConversation = [

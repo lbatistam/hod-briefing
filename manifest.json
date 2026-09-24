@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "HOD Briefing",
-  "version": "2.2.3",
-  "version_name": "2.2.3",
+  "version": "2.2.4",
+  "version_name": "2.2.4",
   "description": "Transforma conversas e dados do GoHighLevel em handoffs completos para os mentores do HOD.",
   "icons": {
     "16": "icons/icon-16.png",

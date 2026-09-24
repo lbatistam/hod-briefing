@@ -1137,15 +1137,19 @@
       .replace(/^(?:eu\s+)?(?:sou|trabalho|atuo)\s+(?:como\s+|na\s+[aá]rea\s+(?:de\s+)?|no\s+setor\s+(?:de\s+)?|em\s+)?/i, "")
       .replace(/\b(?:hoje|atualmente)\b/gi, "")
       .replace(/\s+(?:em\s+regime\b|há\s+\w+|desde\s+os?\s+\d+|e\s+(?:tenho|tem|possui|possuo|deseja|busca|quer|est[aá]|conta)\b).*$/i, "")
+      .replace(/\s+na\s+constru[cç][aã]o\s+civil\b.*$/i, "")
       .replace(/\s+(?:mas|por[eé]m|porque|quando)\s+.*$/i, "")
       .replace(/[.!;,\s]+$/, "").trim();
     const sensible = value => value && value.length >= 3 && value.length <= 44
       && !isLowValueLeadChatter(value)
-      && !/^(?:sim|n[aã]o|isso|claro|interessad[oa]|disponibilidade|equipamentos?|desempregad[oa])$/i.test(value);
+      && !/^(?:sim|n[aã]o|isso|claro|interessad[oa]|disponibilidade|equipamentos?|desempregad[oa]|home office|trabalho remoto)$/i.test(value);
     let role = "";
     for (const fact of leadFacts) {
       const match = fact.match(/\b(?:eu\s+)?(?:sou|era|fui)\s+(?:um(?:a)?\s+)?([^.!?\n]{2,70})/i)
-        || fact.match(/\b(?:trabalho|atuo|atua|trabalhava|atuava)\s+(?:como\s+|na\s+[aá]rea\s+(?:de\s+)?|no\s+setor\s+(?:de\s+)?|em\s+)([^.!?\n]{2,80})/i);
+        || fact.match(/\b(?:trabalho|atuo|atua|trabalhei|trabalhava|atuei|atuava)\s+(?:como\s+|de\s+|na\s+[aá]rea\s+(?:de\s+)?|no\s+setor\s+(?:de\s+)?|em\s+)([^.!?\n]{2,80})/i)
+        || fact.match(/\b(?:j[aá]\s+)?(?:mexi|mexeu|trabalhei|trabalhava|atuei|atuava)\s+com\s+([^.!?\n]{2,80})/i)
+        || fact.match(/\b(?:tenho|possuo|tem)\s+experi[eê]ncia\s+(?:como\s+|em\s+|de\s+)([^.!?\n]{2,80})/i)
+        || fact.match(/\bexperi[eê]ncia\s+(?:como\s+|em\s+|de\s+)([^.!?\n]{2,80})/i);
       const candidate = cleanChip(match?.[1] || "");
       if (sensible(candidate)) { role = candidate; break; }
     }
